@@ -3,385 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavevoice - Voice Recorder Pro</title>
+    <title>Wavevoice Podcast Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
-
-        .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-glass {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .record-pulse {
-            animation: pulse 1.5s infinite;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .nav-glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .record-pulse { animation: pulse 1.5s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
-
-        .star-rating {
-            direction: rtl;
-            display: inline-block;
-        }
-        .star-rating input { display: none; }
-        .star-rating label {
-            color: #475569;
-            font-size: 1.5rem;
-            padding: 0 2px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input:checked ~ label {
-            color: #fbbf24;
-        }
+        .level-bar { transition: width 0.1s ease; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
     <nav class="w-full nav-glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-tr from-blue-500 to-emerald-500 rounded-lg flex items-center justify-center">
+            <div class="w-8 h-8 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span class="text-xl font-bold tracking-tight">Wavevoice <span class="text-xs font-light text-slate-500 ml-1">v2.0</span></span>
+            <span class="text-xl font-bold">Wavevoice <span class="text-blue-400 text-xs uppercase">Podcast Pro</span></span>
         </div>
-
         <div class="flex items-center gap-4">
-            <div class="hidden md:flex items-center gap-2 mr-4 text-xs text-slate-400">
-                <span>Rate our tool:</span>
-                <div class="star-rating">
-                    <input type="radio" id="5-stars" name="rating" value="5" /><label for="5-stars">★</label>
-                    <input type="radio" id="4-stars" name="rating" value="4" /><label for="4-stars">★</label>
-                    <input type="radio" id="3-stars" name="rating" value="3" /><label for="3-stars">★</label>
-                    <input type="radio" id="2-stars" name="rating" value="2" /><label for="2-stars">★</label>
-                    <input type="radio" id="1-star" name="rating" value="1" /><label for="1-star">★</label>
-                </div>
-            </div>
-            <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Sign In</button>
+             <span class="hidden md:block text-xs text-slate-400 italic">"Voice to Video Motion"</span>
+             <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Login</button>
         </div>
     </nav>
 
-    <main class="flex-1 flex items-center justify-center w-full p-4">
-        <div class="w-full max-w-md glass rounded-3xl p-8 shadow-2xl">
-            <div class="flex justify-between items-start mb-6">
+    <main class="flex-1 flex flex-col md:flex-row gap-6 w-full max-w-6xl p-6">
+        
+        <div class="w-full md:w-1/2 glass rounded-3xl p-6 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <span class="w-2 h-6 bg-blue-500 rounded-full"></span> 1. Mic Setup & Test
+            </h2>
+
+            <div class="space-y-4 mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Audio Dashboard</h1>
-                    <p id="dateDisplay" class="text-slate-400 text-xs mt-1 uppercase tracking-widest font-semibold"></p>
-                </div>
-                <div class="text-right">
-                    <div id="storageInfo" class="text-[10px] text-slate-500 mb-1">SESSION STAGE</div>
-                    <div id="sessionCount" class="text-emerald-400 font-mono text-sm">0.0 MB</div>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <label for="micSelect" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Input Source</label>
-                <div class="relative">
-                    <select id="micSelect" class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer">
-                        <option value="">Requesting access...</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Select Device</label>
+                    <select id="micSelect" class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-all cursor-pointer">
+                        <option value="">Loading microphones...</option>
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-2 uppercase font-bold">
+                        <span>Mic Input Level</span>
+                        <span id="dbValue">-∞ dB</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                        <div id="micMeter" class="level-bar h-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-500" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="relative h-40 w-full bg-slate-900/50 rounded-2xl mb-8 overflow-hidden border border-slate-700/50">
+            <div class="relative h-48 w-full bg-black/40 rounded-2xl mb-6 overflow-hidden border border-slate-700/50 group">
                 <canvas id="visualizer" class="w-full h-full"></canvas>
-                <div id="timer" class="absolute top-2 right-4 font-mono text-xl text-emerald-400 hidden">00:00</div>
-                <div id="recordingIndicator" class="absolute top-3 left-4 flex items-center gap-2 hidden">
-                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Live</span>
+                <div id="timer" class="absolute top-4 right-4 font-mono text-2xl text-emerald-400 drop-shadow-lg hidden">00:00</div>
+                <div id="recLabel" class="absolute top-5 left-5 flex items-center gap-2 hidden">
+                    <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Recording</span>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center gap-6">
-                <div class="relative">
-                    <button id="recordBtn" class="w-20 h-20 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg shadow-red-500/20 active:scale-95">
-                        <svg id="recordIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                        <svg id="stopIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
-                            <rect x="6" y="6" width="12" height="12" rx="2" />
-                        </svg>
-                    </button>
-                </div>
-                
-                <p id="statusText" class="text-slate-400 font-medium">Ready to capture</p>
+            <div class="flex flex-col items-center">
+                <button id="recordBtn" class="w-24 h-24 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl shadow-red-500/20 group">
+                    <div id="recordIcon" class="w-8 h-8 bg-white rounded-full group-hover:scale-90 transition-transform"></div>
+                    <div id="stopIcon" class="w-8 h-8 bg-white rounded-sm hidden group-hover:scale-95 transition-transform"></div>
+                </button>
+                <p id="statusText" class="mt-4 text-slate-400 font-medium">Click to Start Podcast</p>
             </div>
+        </div>
 
-            <div class="mt-10">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-slate-200">Library</h2>
-                    <span id="recordingCount" class="text-xs bg-slate-700 px-2 py-1 rounded-full text-slate-300">0 Items</span>
-                </div>
-                
-                <div id="recordingsList" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
-                    <div id="emptyState" class="text-center py-8 text-slate-500 italic text-sm border-2 border-dashed border-slate-800 rounded-2xl">
-                        No audio files found.
+        <div class="w-full md:w-1/2 flex flex-col gap-6">
+            <div class="glass rounded-3xl p-6 flex-1 flex flex-col">
+                <h2 class="text-xl font-bold mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-6 bg-purple-500 rounded-full"></span> 2. Audio Library
+                    </div>
+                    <span id="recordingCount" class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-300">0</span>
+                </h2>
+
+                <div id="recordingsList" class="space-y-4 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
+                    <div id="emptyState" class="text-center py-20 text-slate-600 italic">
+                        No recordings yet. Your podcast files will appear here.
                     </div>
                 </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 p-4 rounded-2xl">
+                <p class="text-xs text-blue-200 leading-relaxed italic text-center">
+                    💡 <b>Tip:</b> After recording, click the "Video" icon to generate a Podcast-style video with a moving waveform for social media!
+                </p>
             </div>
         </div>
     </main>
 
-    <div id="customAlert" class="fixed top-20 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl border-emerald-500/50 text-emerald-400 hidden transition-all duration-300 z-50">
-        <span id="alertMsg"></span>
-    </div>
+    <canvas id="exportCanvas" width="1080" height="1920" class="hidden"></canvas>
 
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let audioContext;
-        let analyzer;
-        let dataArray;
-        let animationId;
-        let startTime;
-        let timerInterval;
-        let stream;
-        let phase = 0;
-        let totalSize = 0;
+        let mediaRecorder, audioChunks = [], audioContext, analyzer, dataArray, stream, timerInterval;
+        let testAnalyzer, testDataArray;
 
         const recordBtn = document.getElementById('recordBtn');
-        const recordIcon = document.getElementById('recordIcon');
-        const stopIcon = document.getElementById('stopIcon');
-        const statusText = document.getElementById('statusText');
-        const timerDisplay = document.getElementById('timer');
-        const recordingsList = document.getElementById('recordingsList');
-        const emptyState = document.getElementById('emptyState');
-        const recordingCount = document.getElementById('recordingCount');
         const micSelect = document.getElementById('micSelect');
-        const canvas = document.getElementById('visualizer');
-        const canvasCtx = canvas.getContext('2d');
-        const sessionCount = document.getElementById('sessionCount');
-        const recIndicator = document.getElementById('recordingIndicator');
+        const micMeter = document.getElementById('micMeter');
+        const dbValue = document.getElementById('dbValue');
+        const visualizer = document.getElementById('visualizer');
+        const vCtx = visualizer.getContext('2d');
 
-        // Set Date
-        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-
-        async function initDevices() {
+        // 1. Initialize & Mic Test
+        async function init() {
             try {
-                const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                tempStream.getTracks().forEach(track => track.stop());
-                
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const devices = await navigator.mediaDevices.enumerateDevices();
-                const audioInputs = devices.filter(device => device.kind === 'audioinput');
+                const inputs = devices.filter(d => d.kind === 'audioinput');
                 
-                micSelect.innerHTML = audioInputs.map(device => 
-                    `<option value="${device.deviceId}">${device.label || 'Microphone ' + (micSelect.length + 1)}</option>`
-                ).join('');
-
-                if (audioInputs.length === 0) {
-                    micSelect.innerHTML = '<option value="">No microphone found</option>';
-                }
-            } catch (err) {
-                micSelect.innerHTML = '<option value="">Permission denied</option>';
+                micSelect.innerHTML = inputs.map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
+                
+                // Start continuous mic monitoring
+                startMicTest(s);
+                resize();
+            } catch (e) {
+                micSelect.innerHTML = '<option>Access Denied</option>';
             }
         }
 
-        function resizeCanvas() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+        function startMicTest(stream) {
+            const ctx = new AudioContext();
+            const source = ctx.createMediaStreamSource(stream);
+            testAnalyzer = ctx.createAnalyser();
+            testAnalyzer.fftSize = 256;
+            source.connect(testAnalyzer);
+            testDataArray = new Uint8Array(testAnalyzer.frequencyBinCount);
+            
+            function updateMeter() {
+                testAnalyzer.getByteFrequencyData(testDataArray);
+                let sum = testDataArray.reduce((a, b) => a + b, 0);
+                let average = sum / testDataArray.length;
+                let volume = Math.round((average / 128) * 100);
+                micMeter.style.width = volume + "%";
+                dbValue.innerText = volume > 0 ? `-${100-volume} dB` : "-∞ dB";
+                requestAnimationFrame(updateMeter);
+            }
+            updateMeter();
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        initDevices();
 
-        function showAlert(msg, colorClass = 'text-emerald-400') {
-            const alert = document.getElementById('customAlert');
-            const alertMsg = document.getElementById('alertMsg');
-            alertMsg.innerText = msg;
-            alert.className = `fixed top-20 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl border-emerald-500/50 ${colorClass} transition-all duration-300 z-50`;
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 3000);
-        }
-
-        async function startRecording() {
-            try {
-                const deviceId = micSelect.value;
-                const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
-
+        // 2. Recording Logic
+        async function toggleRecord() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                stopUI();
+            } else {
+                const constraints = { audio: { deviceId: micSelect.value ? { exact: micSelect.value } : undefined } };
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(stream);
-                analyzer = audioContext.createAnalyser();
-                analyzer.fftSize = 256;
-                source.connect(analyzer);
-                
-                dataArray = new Uint8Array(analyzer.frequencyBinCount);
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-
-                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                    totalSize += (audioBlob.size / 1024 / 1024);
-                    sessionCount.innerText = `${totalSize.toFixed(1)} MB`;
-                    addRecordingToList(audioBlob);
-                    stream.getTracks().forEach(t => t.stop());
-                    if (audioContext) audioContext.close();
-                };
-
-                mediaRecorder.start();
-                recordBtn.classList.add('record-pulse');
-                recordIcon.classList.add('hidden');
-                stopIcon.classList.remove('hidden');
-                statusText.innerText = 'Capturing Audio...';
-                statusText.classList.add('text-red-400');
-                timerDisplay.classList.remove('hidden');
-                recIndicator.classList.remove('hidden');
-                micSelect.disabled = true;
                 
-                startTimer();
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = saveRecording;
+                
+                mediaRecorder.start();
+                startUI();
                 drawWave();
-            } catch (err) {
-                showAlert('Access Denied!', 'text-red-400');
             }
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                cancelAnimationFrame(animationId);
-                clearInterval(timerInterval);
-                recordBtn.classList.remove('record-pulse');
-                recordIcon.classList.remove('hidden');
-                stopIcon.classList.add('hidden');
-                statusText.innerText = 'Ready to capture';
-                statusText.classList.remove('text-red-400');
-                timerDisplay.classList.add('hidden');
-                recIndicator.classList.add('hidden');
-                micSelect.disabled = false;
-                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
-        function startTimer() {
-            startTime = Date.now();
-            timerInterval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                const sec = Math.floor((elapsed / 1000) % 60).toString().padStart(2, '0');
-                const min = Math.floor((elapsed / 1000 / 60) % 60).toString().padStart(2, '0');
-                timerDisplay.innerText = `${min}:${sec}`;
-            }, 100);
-        }
-
-        function drawWave() {
-            animationId = requestAnimationFrame(drawWave);
-            analyzer.getByteFrequencyData(dataArray);
-            let sum = dataArray.reduce((a, b) => a + b, 0);
-            const normalizedVol = sum / dataArray.length / 128;
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSingleWave(normalizedVol, 0.4, '#3b82f6', 0.5, phase);
-            drawSingleWave(normalizedVol, 0.2, '#10b981', 0.8, phase * 1.5);
-            drawSingleWave(normalizedVol, 0.8, '#60a5fa', 1, phase * 0.8);
-            phase += 0.05 + (normalizedVol * 0.1);
-        }
-
-        function drawSingleWave(volume, opacity, color, freq, pOff) {
-            canvasCtx.beginPath();
-            canvasCtx.strokeStyle = color;
-            canvasCtx.lineWidth = 2;
-            canvasCtx.globalAlpha = opacity;
-            const midY = canvas.height / 2;
-            const amp = 5 + (volume * 60);
-            for (let x = 0; x <= canvas.width; x += 2) {
-                const y = midY + Math.sin(x * 0.02 * freq + pOff) * amp;
-                x === 0 ? canvasCtx.moveTo(x, y) : canvasCtx.lineTo(x, y);
-            }
-            canvasCtx.stroke();
-            canvasCtx.globalAlpha = 1.0;
-        }
-
-        function addRecordingToList(blob) {
-            emptyState.classList.add('hidden');
+        function saveRecording() {
+            const blob = new Blob(audioChunks, { type: 'audio/wav' });
             const url = URL.createObjectURL(blob);
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const sizeStr = (blob.size / 1024).toFixed(1) + ' KB';
+            addToList(url, blob);
+            stream.getTracks().forEach(t => t.stop());
+        }
 
+        function addToList(url, blob) {
+            document.getElementById('emptyState').classList.add('hidden');
+            const id = Date.now();
             const item = document.createElement('div');
-            item.className = 'bg-slate-800/40 p-3 rounded-2xl border border-slate-700/50 flex flex-col gap-2 hover:bg-slate-800/60 transition-all';
+            item.className = "bg-slate-800/60 p-4 rounded-2xl border border-slate-700 space-y-3";
             item.innerHTML = `
-                <div class="flex justify-between items-center px-1">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold text-slate-200">VOICE_${Date.now().toString().slice(-4)}</span>
-                        <span class="text-[10px] text-slate-500 uppercase">${timeStr} • ${sizeStr}</span>
-                    </div>
-                    <div class="flex gap-1">
-                        <button onclick="downloadRecording('${url}')" class="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 transition-colors">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-width="2"/></svg>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-tighter">Podcast_REC_${id.toString().slice(-4)}</span>
+                    <div class="flex gap-2">
+                        <button onclick="exportToVideo('${url}')" class="p-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7zM1 19h14a2 2 0 002-2V7a2 2 0 00-2-2H1a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg> VIDEO
                         </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove(); updateCount();" class="p-2 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="p-2 bg-slate-700 hover:bg-red-600 rounded-lg transition-all">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg>
                         </button>
                     </div>
                 </div>
-                <audio controls src="${url}" class="w-full h-8 brightness-90 contrast-125"></audio>
+                <audio controls src="${url}" class="w-full h-8 opacity-80"></audio>
             `;
-            recordingsList.prepend(item);
-            updateCount();
-            showAlert('Recording saved to library');
+            document.getElementById('recordingsList').prepend(item);
         }
 
-        window.downloadRecording = (url) => {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Wavevoice_${Date.now()}.wav`;
-            a.click();
-        };
-
-        function updateCount() {
-            const count = recordingsList.querySelectorAll('.bg-slate-800\\/40').length;
-            recordingCount.innerText = `${count} Items`;
-            if (count === 0) {
-                emptyState.classList.remove('hidden');
-                totalSize = 0;
-                sessionCount.innerText = '0.0 MB';
+        // 3. Podcast Video Export (Canvas to MediaStream)
+        async function exportToVideo(audioUrl) {
+            alert("Generating Podcast Video (9:16)... This will take a few seconds of playback.");
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+            const audio = new Audio(audioUrl);
+            const aCtx = new AudioContext();
+            const source = aCtx.createMediaStreamSource(audio.captureStream ? audio.captureStream() : audio.mozCaptureStream ? audio.mozCaptureStream() : stream);
+            // Note: For full stability, a real app would use a library like Remotion or FFmpeg.wasm.
+            // This is a browser-native shortcut.
+            audio.play();
+            
+            const streamOut = canvas.captureStream(30);
+            const recorder = new MediaRecorder(streamOut, { mimeType: 'video/webm' });
+            const chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const videoUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = videoUrl;
+                a.download = "podcast_video.webm";
+                a.click();
+            };
+            
+            recorder.start();
+            
+            function renderFrame() {
+                if(audio.paused || audio.ended) { recorder.stop(); return; }
+                // Background
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw Waveform (Podcast Style)
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                for(let i=0; i<30; i++) {
+                    let h = Math.random() * 200 + 50;
+                    ctx.moveTo(200 + (i*25), 960 - h);
+                    ctx.lineTo(200 + (i*25), 960 + h);
+                }
+                ctx.stroke();
+                
+                requestAnimationFrame(renderFrame);
             }
+            renderFrame();
         }
 
-        recordBtn.addEventListener('click', () => {
-            (mediaRecorder && mediaRecorder.state === 'recording') ? stopRecording() : startRecording();
-        });
+        // UI Helpers
+        function startUI() {
+            document.getElementById('recordIcon').classList.add('hidden');
+            document.getElementById('stopIcon').classList.remove('hidden');
+            document.getElementById('timer').classList.remove('hidden');
+            document.getElementById('recLabel').classList.remove('hidden');
+            recordBtn.classList.add('record-pulse');
+            let s = 0;
+            timerInterval = setInterval(() => {
+                s++;
+                let min = Math.floor(s/60).toString().padStart(2,'0');
+                let sec = (s%60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${min}:${sec}`;
+            }, 1000);
+        }
 
-        // Rating Alert
-        document.querySelectorAll('.star-rating input').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                showAlert(`Thanks for rating us ${e.target.value} stars!`);
-            });
-        });
+        function stopUI() {
+            document.getElementById('recordIcon').classList.remove('hidden');
+            document.getElementById('stopIcon').classList.add('hidden');
+            document.getElementById('timer').classList.add('hidden');
+            document.getElementById('recLabel').classList.add('hidden');
+            recordBtn.classList.remove('record-pulse');
+            clearInterval(timerInterval);
+        }
 
-        navigator.mediaDevices.ondevicechange = initDevices;
+        function drawWave() {
+            if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
+            requestAnimationFrame(drawWave);
+            vCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+            vCtx.strokeStyle = '#3b82f6';
+            vCtx.lineWidth = 3;
+            vCtx.beginPath();
+            let sliceWidth = visualizer.width / 50;
+            let x = 0;
+            for(let i=0; i<50; i++) {
+                let v = Math.random() * 50;
+                vCtx.moveTo(x, visualizer.height/2 - v);
+                vCtx.lineTo(x, visualizer.height/2 + v);
+                x += sliceWidth;
+            }
+            vCtx.stroke();
+        }
+
+        function resize() {
+            visualizer.width = visualizer.offsetWidth;
+            visualizer.height = visualizer.offsetHeight;
+        }
+
+        window.onresize = resize;
+        recordBtn.onclick = toggleRecord;
+        init();
     </script>
 </body>
 </html>
