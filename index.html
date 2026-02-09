@@ -1,305 +1,575 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavevoice Podcast Studio</title>
+    <title>Wavevoice Pro Video Editor - Ultra HD</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Freehand&family=Kantumruy+Pro:wght@400;700&family=Moul&family=Siemreap&family=Chenla&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .record-pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        :root {
+            --capcut-bg: #0a0a0a;
+            --capcut-panel: #141414;
+            --capcut-accent: #2c64f8;
+            --capcut-border: rgba(255, 255, 255, 0.05);
         }
-        .level-bar { transition: width 0.1s ease; }
+
+        body { 
+            font-family: 'Inter', 'Kantumruy Pro', sans-serif; 
+            background-color: var(--capcut-bg); 
+            color: #e2e2e2; 
+            overflow: hidden; 
+            user-select: none;
+        }
+
+        .glass-panel { background: var(--capcut-panel); border: 1px solid var(--capcut-border); }
+        
+        .canvas-area {
+            position: relative;
+            max-width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        #mainCanvas { width: 100%; height: 100%; }
+
+        .timeline-container {
+            height: 280px;
+            background: #0f0f0f;
+            border-top: 1px solid var(--capcut-border);
+        }
+
+        .timeline-track {
+            height: 44px;
+            margin: 2px 0;
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            align-items: center;
+            padding-left: 150px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .timeline-track:hover { background: rgba(255,255,255,0.05); }
+
+        .track-label {
+            position: absolute; left: 0; width: 140px; height: 100%;
+            background: #181818; display: flex; align-items: center;
+            padding: 0 12px; font-size: 11px; border-right: 1px solid var(--capcut-border);
+            z-index: 5; color: #aaa; overflow: hidden; white-space: nowrap;
+        }
+
+        .clip-block {
+            background: var(--capcut-accent); height: 34px; border-radius: 4px; opacity: 0.7;
+            box-shadow: 0 0 10px rgba(44, 100, 248, 0.3);
+        }
+
+        .playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: #ff3e3e;
+            left: 150px; z-index: 20; pointer-events: none;
+        }
+
+        .active-layer { background: rgba(44, 100, 248, 0.2) !important; border: 1px solid var(--capcut-accent) !important; }
+
+        .cap-btn {
+            display: flex; flex-direction: column; align-items: center; padding: 12px;
+            border-radius: 10px; color: #777; transition: 0.3s;
+        }
+        .cap-btn:hover { color: #fff; background: #1a1a1a; }
+        .cap-btn.active { color: var(--capcut-accent); }
+
+        /* Custom UI */
+        input[type="range"] { accent-color: var(--capcut-accent); }
+        select { outline: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
+<body class="flex flex-col h-screen">
 
-    <nav class="w-full nav-glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <span class="text-xl font-bold">Wavevoice <span class="text-blue-400 text-xs uppercase">Podcast Pro</span></span>
-        </div>
+    <!-- Header -->
+    <header class="h-14 border-b border-white/5 flex items-center justify-between px-8 bg-[#000]">
         <div class="flex items-center gap-4">
-             <span class="hidden md:block text-xs text-slate-400 italic">"Voice to Video Motion"</span>
-             <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Login</button>
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">W</div>
+            <h1 class="font-bold text-sm tracking-widest uppercase">Wavevoice <span class="text-blue-500">Ultra HD</span></h1>
         </div>
-    </nav>
+        <div class="flex gap-3">
+            <select id="exportQuality" class="bg-[#1a1a1a] text-[11px] px-3 py-1 rounded border border-white/10 text-gray-400">
+                <option value="1">720p (Normal)</option>
+                <option value="2" selected>1080p (Full HD)</option>
+                <option value="4">4K (Ultra HD)</option>
+            </select>
+            <button onclick="exportVideoHD()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-full text-[11px] font-black transition-all transform hover:scale-105">
+                EXPORT HD
+            </button>
+        </div>
+    </header>
 
-    <main class="flex-1 flex flex-col md:flex-row gap-6 w-full max-w-6xl p-6">
-        
-        <div class="w-full md:w-1/2 glass rounded-3xl p-6 shadow-2xl">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                <span class="w-2 h-6 bg-blue-500 rounded-full"></span> 1. Mic Setup & Test
-            </h2>
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Tools -->
+        <aside class="w-24 border-r border-white/5 flex flex-col py-6 gap-3 bg-[#000]">
+            <button onclick="document.getElementById('videoInput').click()" class="cap-btn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5"/></svg>
+                <span class="text-[10px] mt-2">មេឌៀ</span>
+            </button>
+            <button onclick="addTextLayer()" class="cap-btn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-width="1.5"/></svg>
+                <span class="text-[10px] mt-2">អត្ថបទ</span>
+            </button>
+            <button onclick="addWaveform()" class="cap-btn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V5l12 7-12 7z" stroke-width="1.5"/></svg>
+                <span class="text-[10px] mt-2">រលកសម្លេង</span>
+            </button>
+            <input type="file" id="videoInput" accept="video/*" class="hidden">
+        </aside>
 
-            <div class="space-y-4 mb-8">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Select Device</label>
-                    <select id="micSelect" class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-all cursor-pointer">
-                        <option value="">Loading microphones...</option>
-                    </select>
+        <!-- Main Editor -->
+        <div class="flex-1 flex flex-col bg-[#0d0d0d]">
+            <div class="flex-1 flex items-center justify-center p-10 relative">
+                <div class="canvas-area overflow-hidden" id="canvasContainer">
+                    <canvas id="mainCanvas"></canvas>
                 </div>
 
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
-                    <div class="flex justify-between text-[10px] text-slate-500 mb-2 uppercase font-bold">
-                        <span>Mic Input Level</span>
-                        <span id="dbValue">-∞ dB</span>
+                <!-- Inspector Panel -->
+                <div id="inspector" class="absolute right-8 top-8 w-72 glass-panel rounded-2xl p-6 hidden z-50 max-h-[80%] overflow-y-auto shadow-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-[12px] font-bold text-blue-500 uppercase tracking-widest">ការកំណត់ LAYER</h3>
+                        <button onclick="selectLayer(-1)" class="text-gray-500 hover:text-white">✕</button>
                     </div>
-                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
-                        <div id="micMeter" class="level-bar h-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-500" style="width: 0%"></div>
+                    
+                    <div class="space-y-6">
+                        <!-- Common Settings -->
+                        <div class="space-y-3">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold">ឈ្មោះ Layer</label>
+                            <input type="text" id="layerName" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                        </div>
+
+                        <!-- Text Specific Settings -->
+                        <div id="textSettings" class="hidden space-y-5">
+                            <div class="space-y-3">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">អត្ថបទ</label>
+                                <textarea id="layerText" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 h-20"></textarea>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">ពុម្ពអក្សរ (Font Style)</label>
+                                <select id="layerFont" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                                    <option value="'Kantumruy Pro'">Kantumruy Pro</option>
+                                    <option value="'Siemreap'">Siemreap (ធម្មតា)</option>
+                                    <option value="'Moul'">Moul (មូល)</option>
+                                    <option value="'Chenla'">Chenla (បុរាណ)</option>
+                                    <option value="'Freehand'">Freehand (សរសេរដៃ)</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[10px] text-gray-500 uppercase">ស្រមោល</label>
+                                    <input type="checkbox" id="textShadow" class="w-4 h-4 rounded">
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[10px] text-gray-500 uppercase">គំនូសជុំវិញ</label>
+                                    <input type="checkbox" id="textOutline" class="w-4 h-4 rounded">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Waveform Specific Settings -->
+                        <div id="waveSettings" class="hidden space-y-5">
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[10px] text-gray-400"><span>ម៉ូដរលក</span></div>
+                                <select id="waveStyle" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                                    <option value="bars">Bars Classic</option>
+                                    <option value="symmetric">Symmetric</option>
+                                    <option value="circle">Center Circle</option>
+                                    <option value="blocks">Digital Blocks</option>
+                                    <option value="fire">Fire Peaks</option>
+                                    <option value="heartbeat">Heartbeat</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Transforms -->
+                        <div class="space-y-4 pt-4 border-t border-white/5">
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[10px]"><span>ទំហំ (Scale)</span><span id="scaleVal">100%</span></div>
+                                <input type="range" id="layerScale" min="0.1" max="5" step="0.1" class="w-full h-1 bg-gray-800 rounded-full">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] block">ពណ៌ Layer</label>
+                                <input type="color" id="layerColor" class="w-full h-10 bg-transparent border-none cursor-pointer">
+                            </div>
+                        </div>
+
+                        <button onclick="deleteLayer()" class="w-full py-3 bg-red-950/20 text-red-500 text-[10px] rounded-xl font-bold hover:bg-red-900/40 transition">លុប LAYER</button>
                     </div>
                 </div>
             </div>
 
-            <div class="relative h-48 w-full bg-black/40 rounded-2xl mb-6 overflow-hidden border border-slate-700/50 group">
-                <canvas id="visualizer" class="w-full h-full"></canvas>
-                <div id="timer" class="absolute top-4 right-4 font-mono text-2xl text-emerald-400 drop-shadow-lg hidden">00:00</div>
-                <div id="recLabel" class="absolute top-5 left-5 flex items-center gap-2 hidden">
-                    <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-                    <span class="text-xs font-bold text-red-500 uppercase tracking-widest">Recording</span>
+            <!-- Timeline -->
+            <div class="timeline-container flex flex-col shadow-inner">
+                <div class="timeline-header">
+                    <div class="flex items-center gap-6">
+                        <button id="playBtn" class="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition">
+                            <svg id="playIcon" class="w-5 h-5 fill-white" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.841z"/></svg>
+                        </button>
+                        <span id="timeDisplay" class="text-[12px] font-mono text-gray-400">00:00:00 / 00:00:00</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="flex flex-col items-center">
-                <button id="recordBtn" class="w-24 h-24 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl shadow-red-500/20 group">
-                    <div id="recordIcon" class="w-8 h-8 bg-white rounded-full group-hover:scale-90 transition-transform"></div>
-                    <div id="stopIcon" class="w-8 h-8 bg-white rounded-sm hidden group-hover:scale-95 transition-transform"></div>
-                </button>
-                <p id="statusText" class="mt-4 text-slate-400 font-medium">Click to Start Podcast</p>
+                <div class="flex-1 overflow-y-auto relative" id="timelineArea">
+                    <div id="timelineTracks"></div>
+                    <div class="playhead" id="playhead"></div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="w-full md:w-1/2 flex flex-col gap-6">
-            <div class="glass rounded-3xl p-6 flex-1 flex flex-col">
-                <h2 class="text-xl font-bold mb-4 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-6 bg-purple-500 rounded-full"></span> 2. Audio Library
-                    </div>
-                    <span id="recordingCount" class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-300">0</span>
-                </h2>
+    <video id="sourceVideo" class="hidden" crossorigin="anonymous" playsinline></video>
 
-                <div id="recordingsList" class="space-y-4 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
-                    <div id="emptyState" class="text-center py-20 text-slate-600 italic">
-                        No recordings yet. Your podcast files will appear here.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 p-4 rounded-2xl">
-                <p class="text-xs text-blue-200 leading-relaxed italic text-center">
-                    💡 <b>Tip:</b> After recording, click the "Video" icon to generate a Podcast-style video with a moving waveform for social media!
-                </p>
-            </div>
-        </div>
-    </main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    <canvas id="exportCanvas" width="1080" height="1920" class="hidden"></canvas>
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        signInAnonymously(auth);
 
-    <script>
-        let mediaRecorder, audioChunks = [], audioContext, analyzer, dataArray, stream, timerInterval;
-        let testAnalyzer, testDataArray;
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('sourceVideo');
+        const playBtn = document.getElementById('playBtn');
+        const playhead = document.getElementById('playhead');
 
-        const recordBtn = document.getElementById('recordBtn');
-        const micSelect = document.getElementById('micSelect');
-        const micMeter = document.getElementById('micMeter');
-        const dbValue = document.getElementById('dbValue');
-        const visualizer = document.getElementById('visualizer');
-        const vCtx = visualizer.getContext('2d');
+        let layers = [];
+        let activeIndex = -1;
+        let isDragging = false;
+        let startX, startY;
+        let audioCtx, analyzer, dataArray;
 
-        // 1. Initialize & Mic Test
-        async function init() {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const inputs = devices.filter(d => d.kind === 'audioinput');
-                
-                micSelect.innerHTML = inputs.map(d => `<option value="${d.deviceId}">${d.label || 'Mic'}</option>`).join('');
-                
-                // Start continuous mic monitoring
-                startMicTest(s);
-                resize();
-            } catch (e) {
-                micSelect.innerHTML = '<option>Access Denied</option>';
+        class Layer {
+            constructor(type) {
+                this.id = Date.now();
+                this.type = type;
+                this.name = type === 'waveform' ? 'រលកសម្លេង' : 'អត្ថបទថ្មី';
+                this.x = canvas.width / 2;
+                this.y = canvas.height / 2;
+                this.scale = 1;
+                this.color = type === 'waveform' ? '#2c64f8' : '#ffffff';
+                this.text = 'សរសេរអត្ថបទនៅទីនេះ';
+                this.font = "'Kantumruy Pro'";
+                this.shadow = true;
+                this.outline = false;
+                this.waveStyle = 'bars';
             }
         }
 
-        function startMicTest(stream) {
-            const ctx = new AudioContext();
-            const source = ctx.createMediaStreamSource(stream);
-            testAnalyzer = ctx.createAnalyser();
-            testAnalyzer.fftSize = 256;
-            source.connect(testAnalyzer);
-            testDataArray = new Uint8Array(testAnalyzer.frequencyBinCount);
-            
-            function updateMeter() {
-                testAnalyzer.getByteFrequencyData(testDataArray);
-                let sum = testDataArray.reduce((a, b) => a + b, 0);
-                let average = sum / testDataArray.length;
-                let volume = Math.round((average / 128) * 100);
-                micMeter.style.width = volume + "%";
-                dbValue.innerText = volume > 0 ? `-${100-volume} dB` : "-∞ dB";
-                requestAnimationFrame(updateMeter);
-            }
-            updateMeter();
+        function init() {
+            resize();
+            requestAnimationFrame(draw);
         }
 
-        // 2. Recording Logic
-        async function toggleRecord() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                stopUI();
+        function resize() {
+            const container = document.getElementById('canvasContainer');
+            if (container) {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+        }
+        window.onresize = resize;
+
+        // --- Layers Management ---
+        window.addTextLayer = () => {
+            const l = new Layer('text');
+            layers.push(l);
+            selectLayer(layers.length - 1);
+        };
+
+        window.addWaveform = () => {
+            const l = new Layer('waveform');
+            l.y = canvas.height - 100;
+            layers.push(l);
+            selectLayer(layers.length - 1);
+            if(video.src) initAudio();
+        };
+
+        function selectLayer(index) {
+            activeIndex = index;
+            const inspector = document.getElementById('inspector');
+            const textSettings = document.getElementById('textSettings');
+            const waveSettings = document.getElementById('waveSettings');
+            
+            if(index === -1) {
+                inspector.classList.add('hidden');
             } else {
-                const constraints = { audio: { deviceId: micSelect.value ? { exact: micSelect.value } : undefined } };
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = saveRecording;
-                
-                mediaRecorder.start();
-                startUI();
-                drawWave();
+                const l = layers[index];
+                inspector.classList.remove('hidden');
+                document.getElementById('layerName').value = l.name;
+                document.getElementById('layerScale').value = l.scale;
+                document.getElementById('scaleVal').innerText = Math.round(l.scale * 100) + '%';
+                document.getElementById('layerColor').value = l.color;
+
+                textSettings.classList.toggle('hidden', l.type !== 'text');
+                waveSettings.classList.toggle('hidden', l.type !== 'waveform');
+
+                if(l.type === 'text') {
+                    document.getElementById('layerText').value = l.text;
+                    document.getElementById('layerFont').value = l.font;
+                    document.getElementById('textShadow').checked = l.shadow;
+                    document.getElementById('textOutline').checked = l.outline;
+                } else if(l.type === 'waveform') {
+                    document.getElementById('waveStyle').value = l.waveStyle;
+                }
+            }
+            renderTimeline();
+        }
+
+        window.deleteLayer = () => {
+            if(activeIndex !== -1) {
+                layers.splice(activeIndex, 1);
+                selectLayer(-1);
+            }
+        };
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineTracks');
+            container.innerHTML = '';
+            layers.forEach((l, i) => {
+                const track = document.createElement('div');
+                track.className = `timeline-track ${i === activeIndex ? 'active-layer' : ''}`;
+                track.onclick = () => selectLayer(i);
+                track.innerHTML = `<div class="track-label">${l.name}</div><div class="clip-block" style="width: 80%; background: ${l.color}"></div>`;
+                container.appendChild(track);
+            });
+        }
+
+        // --- Core Rendering ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Video Background
+            if(video.readyState >= 2) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#050505';
+                ctx.fillRect(0,0, canvas.width, canvas.height);
+            }
+
+            layers.forEach((l, i) => {
+                ctx.save();
+                if(l.type === 'text') {
+                    ctx.font = `bold ${36 * l.scale}px ${l.font}`;
+                    ctx.textAlign = 'center';
+                    
+                    if(l.shadow) {
+                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                        ctx.shadowBlur = 10;
+                        ctx.shadowOffsetX = 4;
+                        ctx.shadowOffsetY = 4;
+                    }
+
+                    if(l.outline) {
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 6 * l.scale;
+                        ctx.strokeText(l.text, l.x, l.y);
+                    }
+
+                    ctx.fillStyle = l.color;
+                    ctx.fillText(l.text, l.x, l.y);
+                } else if(l.type === 'waveform' && analyzer) {
+                    analyzer.getByteFrequencyData(dataArray);
+                    ctx.fillStyle = l.color;
+                    ctx.strokeStyle = l.color;
+                    ctx.lineWidth = 3 * l.scale;
+                    
+                    const count = 50;
+                    const barWidth = (canvas.width * 0.7 / count) * l.scale;
+
+                    for(let j=0; j<count; j++) {
+                        const h = (dataArray[j]/255) * 120 * l.scale;
+                        const px = l.x + (j * barWidth);
+                        const py = l.y;
+
+                        if(l.waveStyle === 'bars') {
+                            ctx.fillRect(px, py - h/2, barWidth - 4, h);
+                        } else if(l.waveStyle === 'symmetric') {
+                            ctx.fillRect(px, py - h, barWidth - 4, h * 2);
+                        } else if(l.waveStyle === 'circle') {
+                            const ang = (j/count) * Math.PI * 2;
+                            const rx = l.x + Math.cos(ang) * (60 * l.scale + h);
+                            const ry = l.y + Math.sin(ang) * (60 * l.scale + h);
+                            ctx.fillRect(rx, ry, barWidth/2, barWidth/2);
+                        } else if(l.waveStyle === 'blocks') {
+                            const bs = 10 * l.scale;
+                            for(let k=0; k<h/bs; k++) ctx.fillRect(px, py - (k * bs * 1.2), barWidth-2, bs);
+                        } else if(l.waveStyle === 'fire') {
+                            ctx.globalAlpha = 0.5;
+                            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + barWidth/2, py-h*1.5); ctx.lineTo(px+barWidth, py); ctx.fill();
+                            ctx.globalAlpha = 1;
+                            ctx.beginPath(); ctx.moveTo(px+2, py); ctx.lineTo(px + barWidth/2, py-h); ctx.lineTo(px+barWidth-2, py); ctx.fill();
+                        } else if(l.waveStyle === 'heartbeat') {
+                            const modH = j%8 === 0 ? h*2 : h/3;
+                            ctx.fillRect(px, py - modH, barWidth-2, modH*2);
+                        }
+                    }
+                }
+
+                if(i === activeIndex) {
+                    ctx.strokeStyle = '#2c64f8';
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(l.x - 100, l.y - 40, 200, 60);
+                    ctx.setLineDash([]);
+                }
+                ctx.restore();
+            });
+
+            // Update Playhead UI
+            if(video.src && video.duration) {
+                const progress = video.currentTime / video.duration;
+                const timelineWidth = document.getElementById('timelineTracks').clientWidth - 150;
+                playhead.style.left = (150 + (progress * timelineWidth)) + 'px';
+                document.getElementById('timeDisplay').innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+            }
+            requestAnimationFrame(draw);
+        }
+
+        function formatTime(s) {
+            const h = Math.floor(s/3600).toString().padStart(2,'0');
+            const m = Math.floor((s % 3600)/60).toString().padStart(2,'0');
+            const sec = Math.floor(s%60).toString().padStart(2,'0');
+            return `${h}:${m}:${sec}`;
+        }
+
+        // --- Inputs Events ---
+        document.getElementById('layerName').oninput = (e) => { if(activeIndex !== -1) { layers[activeIndex].name = e.target.value; renderTimeline(); } };
+        document.getElementById('layerText').oninput = (e) => { if(activeIndex !== -1) layers[activeIndex].text = e.target.value; };
+        document.getElementById('layerFont').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].font = e.target.value; };
+        document.getElementById('textShadow').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].shadow = e.target.checked; };
+        document.getElementById('textOutline').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].outline = e.target.checked; };
+        document.getElementById('layerScale').oninput = (e) => {
+            if(activeIndex !== -1) {
+                layers[activeIndex].scale = parseFloat(e.target.value);
+                document.getElementById('scaleVal').innerText = Math.round(e.target.value * 100) + '%';
+            }
+        };
+        document.getElementById('layerColor').oninput = (e) => { if(activeIndex !== -1) layers[activeIndex].color = e.target.value; };
+        document.getElementById('waveStyle').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].waveStyle = e.target.value; };
+
+        // --- Drag & Interaction ---
+        canvas.onmousedown = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+            for(let i = layers.length-1; i >=0; i--) {
+                const l = layers[i];
+                if(mx > l.x - 100 && mx < l.x + 100 && my > l.y - 60 && my < l.y + 20) {
+                    selectLayer(i); isDragging = true;
+                    startX = mx - l.x; startY = my - l.y; return;
+                }
+            }
+            selectLayer(-1);
+        };
+        window.onmousemove = (e) => {
+            if(!isDragging || activeIndex === -1) return;
+            const rect = canvas.getBoundingClientRect();
+            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+            layers[activeIndex].x = mx - startX;
+            layers[activeIndex].y = my - startY;
+        };
+        window.onmouseup = () => isDragging = false;
+
+        // --- Media Control ---
+        document.getElementById('videoInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                video.src = URL.createObjectURL(file);
+                video.load();
+                video.onloadedmetadata = () => { initAudio(); renderTimeline(); };
+            }
+        };
+
+        async function initAudio() {
+            if(!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaElementSource(video);
+                analyzer = audioCtx.createAnalyser();
+                analyzer.fftSize = 256;
+                source.connect(analyzer);
+                analyzer.connect(audioCtx.destination);
+                dataArray = new Uint8Array(analyzer.frequencyBinCount);
             }
         }
 
-        function saveRecording() {
-            const blob = new Blob(audioChunks, { type: 'audio/wav' });
-            const url = URL.createObjectURL(blob);
-            addToList(url, blob);
-            stream.getTracks().forEach(t => t.stop());
-        }
+        playBtn.onclick = async () => {
+            if(!video.src) return;
+            if(audioCtx?.state === 'suspended') await audioCtx.resume();
+            if(video.paused) {
+                video.play();
+                document.getElementById('playIcon').innerHTML = '<path d="M4 4h4v12H4V4zm8 0h4v12h-4V4z"/>';
+            } else {
+                video.pause();
+                document.getElementById('playIcon').innerHTML = '<path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.841z"/>';
+            }
+        };
 
-        function addToList(url, blob) {
-            document.getElementById('emptyState').classList.add('hidden');
-            const id = Date.now();
-            const item = document.createElement('div');
-            item.className = "bg-slate-800/60 p-4 rounded-2xl border border-slate-700 space-y-3";
-            item.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-blue-400 uppercase tracking-tighter">Podcast_REC_${id.toString().slice(-4)}</span>
-                    <div class="flex gap-2">
-                        <button onclick="exportToVideo('${url}')" class="p-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7zM1 19h14a2 2 0 002-2V7a2 2 0 00-2-2H1a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg> VIDEO
-                        </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="p-2 bg-slate-700 hover:bg-red-600 rounded-lg transition-all">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg>
-                        </button>
-                    </div>
-                </div>
-                <audio controls src="${url}" class="w-full h-8 opacity-80"></audio>
-            `;
-            document.getElementById('recordingsList').prepend(item);
-        }
-
-        // 3. Podcast Video Export (Canvas to MediaStream)
-        async function exportToVideo(audioUrl) {
-            alert("Generating Podcast Video (9:16)... This will take a few seconds of playback.");
-            const canvas = document.getElementById('exportCanvas');
-            const ctx = canvas.getContext('2d');
-            const audio = new Audio(audioUrl);
-            const aCtx = new AudioContext();
-            const source = aCtx.createMediaStreamSource(audio.captureStream ? audio.captureStream() : audio.mozCaptureStream ? audio.mozCaptureStream() : stream);
-            // Note: For full stability, a real app would use a library like Remotion or FFmpeg.wasm.
-            // This is a browser-native shortcut.
-            audio.play();
+        // --- Export HD ---
+        window.exportVideoHD = () => {
+            if(!video.src) return;
+            const scale = parseInt(document.getElementById('exportQuality').value);
             
-            const streamOut = canvas.captureStream(30);
-            const recorder = new MediaRecorder(streamOut, { mimeType: 'video/webm' });
+            // Create hidden high-res canvas
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 1280 * (scale/2); 
+            exportCanvas.height = 720 * (scale/2);
+            const eCtx = exportCanvas.getContext('2d');
+
+            const stream = exportCanvas.captureStream(30);
+            const recorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 8000000 * scale // High Bitrate for HD
+            });
+
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
-                const videoUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = videoUrl;
-                a.download = "podcast_video.webm";
+                a.href = URL.createObjectURL(blob);
+                a.download = `Wavevoice_Pro_${scale === 4 ? '4K' : '1080p'}.webm`;
                 a.click();
             };
-            
+
+            // Start internal rendering loop for export
             recorder.start();
-            
-            function renderFrame() {
-                if(audio.paused || audio.ended) { recorder.stop(); return; }
-                // Background
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw Waveform (Podcast Style)
-                ctx.strokeStyle = '#3b82f6';
-                ctx.lineWidth = 10;
-                ctx.beginPath();
-                for(let i=0; i<30; i++) {
-                    let h = Math.random() * 200 + 50;
-                    ctx.moveTo(200 + (i*25), 960 - h);
-                    ctx.lineTo(200 + (i*25), 960 + h);
+            video.currentTime = 0;
+            video.play();
+
+            const renderExport = () => {
+                if(video.paused || video.ended) {
+                    recorder.stop();
+                    return;
                 }
-                ctx.stroke();
-                
-                requestAnimationFrame(renderFrame);
-            }
-            renderFrame();
-        }
+                eCtx.drawImage(video, 0, 0, exportCanvas.width, exportCanvas.height);
+                // Draw layers with scaling factor
+                layers.forEach(l => {
+                    const ratio = exportCanvas.width / canvas.width;
+                    eCtx.save();
+                    if(l.type === 'text') {
+                        eCtx.font = `bold ${36 * l.scale * ratio}px ${l.font}`;
+                        eCtx.textAlign = 'center';
+                        if(l.shadow) { eCtx.shadowColor = 'black'; eCtx.shadowBlur = 10; }
+                        eCtx.fillStyle = l.color;
+                        eCtx.fillText(l.text, l.x * ratio, l.y * ratio);
+                    }
+                    // Add waveform export logic here similar to draw() but with ratio
+                    eCtx.restore();
+                });
+                requestAnimationFrame(renderExport);
+            };
+            renderExport();
+        };
 
-        // UI Helpers
-        function startUI() {
-            document.getElementById('recordIcon').classList.add('hidden');
-            document.getElementById('stopIcon').classList.remove('hidden');
-            document.getElementById('timer').classList.remove('hidden');
-            document.getElementById('recLabel').classList.remove('hidden');
-            recordBtn.classList.add('record-pulse');
-            let s = 0;
-            timerInterval = setInterval(() => {
-                s++;
-                let min = Math.floor(s/60).toString().padStart(2,'0');
-                let sec = (s%60).toString().padStart(2,'0');
-                document.getElementById('timer').innerText = `${min}:${sec}`;
-            }, 1000);
-        }
-
-        function stopUI() {
-            document.getElementById('recordIcon').classList.remove('hidden');
-            document.getElementById('stopIcon').classList.add('hidden');
-            document.getElementById('timer').classList.add('hidden');
-            document.getElementById('recLabel').classList.add('hidden');
-            recordBtn.classList.remove('record-pulse');
-            clearInterval(timerInterval);
-        }
-
-        function drawWave() {
-            if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
-            requestAnimationFrame(drawWave);
-            vCtx.clearRect(0, 0, visualizer.width, visualizer.height);
-            vCtx.strokeStyle = '#3b82f6';
-            vCtx.lineWidth = 3;
-            vCtx.beginPath();
-            let sliceWidth = visualizer.width / 50;
-            let x = 0;
-            for(let i=0; i<50; i++) {
-                let v = Math.random() * 50;
-                vCtx.moveTo(x, visualizer.height/2 - v);
-                vCtx.lineTo(x, visualizer.height/2 + v);
-                x += sliceWidth;
-            }
-            vCtx.stroke();
-        }
-
-        function resize() {
-            visualizer.width = visualizer.offsetWidth;
-            visualizer.height = visualizer.offsetHeight;
-        }
-
-        window.onresize = resize;
-        recordBtn.onclick = toggleRecord;
         init();
     </script>
 </body>
