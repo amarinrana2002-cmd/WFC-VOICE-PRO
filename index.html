@@ -1,439 +1,445 @@
-<!DOCTYPE html>
+​<!DOCTYPE html>
 <html lang="km">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavevoice Pro Ultimate Editor</title>
+    <title>Wavevoice Pro Video Editor - Complete Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Freehand&family=Kantumruy+Pro:wght@400;700&family=Moul&family=Siemreap&family=Chenla&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050505;
-            --panel: #111111;
-            --accent: #3b82f6;
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #0a0a0a;
+            --panel: #141414;
+            --accent: #2c64f8;
+            --border: rgba(255, 255, 255, 0.05);
         }
-        body { font-family: 'Kantumruy Pro', sans-serif; background: var(--bg); color: #fff; overflow: hidden; }
-        .editor-container { display: grid; grid-template-columns: 80px 1fr 320px; height: calc(100vh - 56px); }
-        .canvas-container { background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        canvas { box-shadow: 0 0 40px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; background: #000; }
-        .inspector { background: var(--panel); border-left: 1px solid var(--border); overflow-y: auto; }
-        .timeline { height: 300px; background: #0a0a0a; border-top: 1px solid var(--border); position: relative; }
-        .track { height: 40px; background: rgba(255,255,255,0.02); margin-bottom: 2px; position: relative; display: flex; align-items: center; }
-        .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #ef4444; z-index: 50; pointer-events: none; }
-        .clip { position: absolute; height: 32px; background: var(--accent); border-radius: 4px; opacity: 0.8; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .clip.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--accent); }
-        .cap-btn { flex-direction: column; display: flex; align-items: center; padding: 12px 0; color: #666; transition: 0.2s; font-size: 10px; }
-        .cap-btn:hover, .cap-btn.active { color: #fff; background: rgba(255,255,255,0.05); }
-        input[type="range"] { accent-color: var(--accent); height: 4px; }
-        select, input[type="text"], textarea { background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 12px; color: #fff; width: 100%; outline: none; }
-        .group-label { font-size: 10px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+
+        body { 
+            font-family: 'Inter', 'Kantumruy Pro', sans-serif; 
+            background: var(--bg); 
+            color: #e2e2e2; 
+            overflow: hidden; 
+            user-select: none;
+        }
+
+        .glass-panel { background: var(--panel); border: 1px solid var(--border); }
+        
+        .canvas-area {
+            position: relative;
+            max-width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        #mainCanvas { width: 100%; height: 100%; cursor: crosshair; }
+
+        .timeline-container {
+            height: 300px;
+            background: #0f0f0f;
+            border-top: 1px solid var(--border);
+        }
+
+        .timeline-track {
+            height: 50px;
+            margin: 2px 0;
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            align-items: center;
+            padding-left: 150px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .timeline-track:hover { background: rgba(255,255,255,0.05); }
+
+        .track-label {
+            position: absolute; left: 0; width: 140px; height: 100%;
+            background: #181818; display: flex; align-items: center;
+            padding: 0 12px; font-size: 11px; border-right: 1px solid var(--border);
+            z-index: 5; color: #aaa; overflow: hidden; white-space: nowrap;
+        }
+
+        .clip-block {
+            background: var(--accent); height: 38px; border-radius: 4px; opacity: 0.8;
+            box-shadow: 0 0 10px rgba(44, 100, 248, 0.3);
+            position: relative;
+        }
+
+        .playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: #ff3e3e;
+            left: 150px; z-index: 20; pointer-events: none;
+        }
+
+        .active-layer { background: rgba(44, 100, 248, 0.2) !important; border: 1px solid var(--accent) !important; }
+
+        .cap-btn {
+            display: flex; flex-direction: column; align-items: center; padding: 12px;
+            border-radius: 10px; color: #777; transition: 0.3s; cursor: pointer;
+        }
+        .cap-btn:hover { color: #fff; background: #1a1a1a; }
+        .cap-btn.active { color: var(--accent); }
+
+        input[type="range"] { accent-color: var(--accent); }
+        select, input, textarea { outline: none; }
+
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .sticker-item {
+            font-size: 32px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .sticker-item:hover {
+            background: rgba(44, 100, 248, 0.2);
+            transform: scale(1.2);
+        }
+
+        .filter-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .filter-preview:hover { border-color: var(--accent); }
+        .filter-preview.active { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--panel);
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 10px 40px rgba(44, 100, 248, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .export-progress {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--panel);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            z-index: 2000;
+            min-width: 400px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #00d4ff);
+            transition: width 0.3s;
+        }
     </style>
 </head>
-<body>
+<body class="flex flex-col h-screen">
 
     <!-- Header -->
-    <header class="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-black">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold">W</div>
-            <span class="text-xs font-black tracking-tighter uppercase">Wavevoice <span class="text-blue-500">Ultimate</span></span>
-        </div>
+    <header class="h-14 border-b border-white/5 flex items-center justify-between px-8 bg-[#000]">
         <div class="flex items-center gap-4">
-            <div class="flex items-center bg-[#1a1a1a] rounded-lg px-3 py-1 gap-3">
-                <span class="text-[10px] text-gray-500">ZOOM</span>
-                <input type="range" id="tlZoom" min="1" max="10" step="0.5" value="1" class="w-24">
-            </div>
-            <select id="exportQuality" class="!w-32 bg-[#1a1a1a]">
-                <option value="1">720p</option>
-                <option value="2" selected>1080p HD</option>
-                <option value="4">4K Ultra</option>
+            <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center font-bold text-white">W</div>
+            <h1 class="font-bold text-sm tracking-widest uppercase">Wavevoice <span class="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Pro Complete</span></h1>
+        </div>
+        <div class="flex gap-3 items-center">
+            <button onclick="undo()" class="px-3 py-1 text-xs text-gray-400 hover:text-white transition">↶ Undo</button>
+            <button onclick="redo()" class="px-3 py-1 text-xs text-gray-400 hover:text-white transition">↷ Redo</button>
+            <select id="exportQuality" class="bg-[#1a1a1a] text-[11px] px-3 py-1 rounded border border-white/10 text-gray-400">
+                <option value="1">720p HD</option>
+                <option value="2" selected>1080p Full HD</option>
+                <option value="4">4K Ultra HD</option>
             </select>
-            <button onclick="exportVideo()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-full text-xs font-bold transition">EXPORT</button>
+            <button onclick="exportVideoHD()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-1.5 rounded-full text-[11px] font-black transition-all transform hover:scale-105">
+                🎬 EXPORT
+            </button>
         </div>
     </header>
 
-    <div class="editor-container">
-        <!-- Toolbar -->
-        <aside class="border-r border-white/5 bg-black flex flex-col pt-4">
-            <button onclick="document.getElementById('videoInput').click()" class="cap-btn">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
-                Media
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Tools -->
+        <aside class="w-24 border-r border-white/5 flex flex-col py-6 gap-2 bg-[#000] overflow-y-auto">
+            <button onclick="document.getElementById('videoInput').click()" class="cap-btn" title="បន្ថែមវីដេអូ">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">វីដេអូ</span>
             </button>
-            <button onclick="addLayer('text')" class="cap-btn">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-width="2"/></svg>
-                Text
+            <button onclick="document.getElementById('imageInput').click()" class="cap-btn" title="បន្ថែមរូបភាព">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">រូបភាព</span>
             </button>
-            <button onclick="addLayer('waveform')" class="cap-btn">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V5l12 7-12 7z" stroke-width="2"/></svg>
-                Audio
+            <button onclick="addTextLayer()" class="cap-btn" title="បន្ថែមអត្ថបទ">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">អត្ថបទ</span>
             </button>
-            <button onclick="addLayer('shape')" class="cap-btn">
-                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 5h16v14H4z" stroke-width="2"/></svg>
-                Shapes
+            <button onclick="addWaveform()" class="cap-btn" title="រលកសម្លេង">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V5m-6 7v7m12-14v14m6-7v7" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">រលក</span>
+            </button>
+            <button onclick="openStickerPanel()" class="cap-btn" title="Stickers">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">Emoji</span>
+            </button>
+            <button onclick="addShape('rectangle')" class="cap-btn" title="រាងជ្រុង">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">ចតុកោណ</span>
+            </button>
+            <button onclick="addShape('circle')" class="cap-btn" title="រង្វង់">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">រង្វង់</span>
+            </button>
+            <button onclick="openFilterPanel()" class="cap-btn" title="ផ្លែកកាត់">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-width="1.5"/></svg>
+                <span class="text-[9px] mt-2">ផ្លែក</span>
             </button>
             <input type="file" id="videoInput" accept="video/*" class="hidden">
+            <input type="file" id="imageInput" accept="image/*" class="hidden">
         </aside>
 
-        <!-- Preview -->
-        <main class="canvas-container">
-            <canvas id="mainCanvas"></canvas>
-        </main>
-
-        <!-- Inspector -->
-        <aside class="inspector p-5 space-y-6">
-            <div id="noSelection" class="text-center py-20 text-gray-600 text-xs">
-                សូមជ្រើសរើស Layer ដើម្បីកំណត់
-            </div>
-
-            <div id="layerEditor" class="hidden space-y-6">
-                <div class="flex justify-between items-center border-b border-white/5 pb-4">
-                    <h3 class="text-xs font-bold text-blue-500 uppercase">ការកំណត់ Layer</h3>
-                    <button onclick="deleteLayer()" class="text-red-500 text-[10px] hover:underline">លុប</button>
+        <!-- Main Editor -->
+        <div class="flex-1 flex flex-col bg-[#0d0d0d]">
+            <div class="flex-1 flex items-center justify-center p-10 relative">
+                <div class="canvas-area overflow-hidden" id="canvasContainer">
+                    <canvas id="mainCanvas"></canvas>
                 </div>
 
-                <!-- Basic Transforms -->
-                <section class="space-y-4">
-                    <span class="group-label">មូលដ្ឋាន</span>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1">
-                            <span class="text-[10px] text-gray-500">Scale</span>
-                            <input type="range" id="lScale" min="0.1" max="5" step="0.01">
+                <!-- Inspector Panel -->
+                <div id="inspector" class="absolute right-8 top-8 w-80 glass-panel rounded-2xl p-6 hidden z-50 max-h-[85%] overflow-y-auto shadow-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-[12px] font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent uppercase tracking-widest">កំណត់ Layer</h3>
+                        <button onclick="selectLayer(-1)" class="text-gray-500 hover:text-white">✕</button>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <!-- Common Settings -->
+                        <div class="space-y-3">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold">ឈ្មោះ Layer</label>
+                            <input type="text" id="layerName" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
                         </div>
-                        <div class="space-y-1">
-                            <span class="text-[10px] text-gray-500">Rotate</span>
-                            <input type="range" id="lRotate" min="0" max="360" step="1">
+
+                        <!-- Text Settings -->
+                        <div id="textSettings" class="hidden space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">អត្ថបទ</label>
+                                <textarea id="layerText" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 h-20"></textarea>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">ពុម្ពអក្សរ</label>
+                                <select id="layerFont" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                                    <option value="'Kantumruy Pro'">Kantumruy Pro</option>
+                                    <option value="'Siemreap'">Siemreap</option>
+                                    <option value="'Moul'">Moul</option>
+                                    <option value="'Chenla'">Chenla</option>
+                                    <option value="'Freehand'">Freehand</option>
+                                    <option value="'Arial'">Arial</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">Animation</label>
+                                <select id="textAnimation" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                                    <option value="none">None</option>
+                                    <option value="fadeIn">Fade In</option>
+                                    <option value="slideLeft">Slide Left</option>
+                                    <option value="slideRight">Slide Right</option>
+                                    <option value="slideUp">Slide Up</option>
+                                    <option value="slideDown">Slide Down</option>
+                                    <option value="zoom">Zoom In</option>
+                                    <option value="bounce">Bounce</option>
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[10px] text-gray-500 uppercase flex items-center gap-2">
+                                        <input type="checkbox" id="textShadow" class="w-4 h-4 rounded">
+                                        ស្រមោល
+                                    </label>
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <label class="text-[10px] text-gray-500 uppercase flex items-center gap-2">
+                                        <input type="checkbox" id="textOutline" class="w-4 h-4 rounded">
+                                        គំនូស
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Waveform Settings -->
+                        <div id="waveSettings" class="hidden space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] text-gray-500 uppercase font-bold">ម៉ូដរលក</label>
+                                <select id="waveStyle" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5">
+                                    <option value="bars">Bars Classic</option>
+                                    <option value="symmetric">Symmetric</option>
+                                    <option value="circle">Circle</option>
+                                    <option value="blocks">Blocks</option>
+                                    <option value="fire">Fire</option>
+                                    <option value="heartbeat">Heartbeat</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Transforms -->
+                        <div class="space-y-4 pt-4 border-t border-white/5">
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[10px]"><span>ទំហំ Scale</span><span id="scaleVal">100%</span></div>
+                                <input type="range" id="layerScale" min="0.1" max="5" step="0.1" value="1" class="w-full h-1 bg-gray-800 rounded-full">
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[10px]"><span>ការបង្វិល Rotation</span><span id="rotateVal">0°</span></div>
+                                <input type="range" id="layerRotate" min="0" max="360" step="1" value="0" class="w-full h-1 bg-gray-800 rounded-full">
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-[10px]"><span>ភាពថ្លា Opacity</span><span id="opacityVal">100%</span></div>
+                                <input type="range" id="layerOpacity" min="0" max="1" step="0.01" value="1" class="w-full h-1 bg-gray-800 rounded-full">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] block">ពណ៌ Color</label>
+                                <input type="color" id="layerColor" value="#ffffff" class="w-full h-10 bg-transparent border-none cursor-pointer">
+                            </div>
+                        </div>
+
+                        <!-- Layer Order -->
+                        <div class="flex gap-2 pt-4 border-t border-white/5">
+                            <button onclick="moveLayerUp()" class="flex-1 py-2 bg-[#1a1a1a] text-[10px] rounded-lg hover:bg-[#222] transition">↑ លើ</button>
+                            <button onclick="moveLayerDown()" class="flex-1 py-2 bg-[#1a1a1a] text-[10px] rounded-lg hover:bg-[#222] transition">↓ ក្រោម</button>
+                        </div>
+
+                        <button onclick="deleteLayer()" class="w-full py-3 bg-red-950/20 text-red-500 text-[10px] rounded-xl font-bold hover:bg-red-900/40 transition">🗑️ លុប Layer</button>
+                    </div>
+                </div>
+
+                <!-- Sticker Panel -->
+                <div id="stickerPanel" class="absolute left-8 top-8 w-80 glass-panel rounded-2xl p-6 hidden z-50 max-h-[85%] overflow-y-auto shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-[12px] font-bold text-purple-500 uppercase tracking-widest">Emoji & Stickers</h3>
+                        <button onclick="closeStickerPanel()" class="text-gray-500 hover:text-white">✕</button>
+                    </div>
+                    <div class="sticker-grid" id="stickerGrid"></div>
+                </div>
+
+                <!-- Filter Panel -->
+                <div id="filterPanel" class="absolute left-8 bottom-8 w-96 glass-panel rounded-2xl p-6 hidden z-50 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-[12px] font-bold text-blue-500 uppercase tracking-widest">Video Filters</h3>
+                        <button onclick="closeFilterPanel()" class="text-gray-500 hover:text-white">✕</button>
+                    </div>
+                    <div class="grid grid-cols-5 gap-3">
+                        <div class="filter-preview" data-filter="none" onclick="applyFilter('none')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></div>
+                        <div class="filter-preview" data-filter="grayscale" onclick="applyFilter('grayscale')" style="background: linear-gradient(135deg, #888 0%, #444 100%)"></div>
+                        <div class="filter-preview" data-filter="sepia" onclick="applyFilter('sepia')" style="background: linear-gradient(135deg, #d4a574 0%, #8b6914 100%)"></div>
+                        <div class="filter-preview" data-filter="invert" onclick="applyFilter('invert')" style="background: linear-gradient(135deg, #00f 0%, #0ff 100%)"></div>
+                        <div class="filter-preview" data-filter="blur" onclick="applyFilter('blur')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); filter: blur(2px)"></div>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px]"><span>Brightness</span><span id="brightnessVal">100%</span></div>
+                            <input type="range" id="brightness" min="0" max="200" value="100" class="w-full">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px]"><span>Contrast</span><span id="contrastVal">100%</span></div>
+                            <input type="range" id="contrast" min="0" max="200" value="100" class="w-full">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[10px]"><span>Saturation</span><span id="saturationVal">100%</span></div>
+                            <input type="range" id="saturation" min="0" max="200" value="100" class="w-full">
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <span class="text-[10px] text-gray-500">Opacity</span>
-                        <input type="range" id="lOpacity" min="0" max="1" step="0.1" value="1">
-                    </div>
-                </section>
-
-                <!-- Video Filters -->
-                <section id="videoFilters" class="hidden space-y-4 border-t border-white/5 pt-4">
-                    <span class="group-label">Video Filters</span>
-                    <div class="space-y-3">
-                        <div><span class="text-[10px] text-gray-500">Brightness</span> <input type="range" id="fBright" min="0" max="200" value="100"></div>
-                        <div><span class="text-[10px] text-gray-500">Contrast</span> <input type="range" id="fContrast" min="0" max="200" value="100"></div>
-                        <div><span class="text-[10px] text-gray-500">Saturation</span> <input type="range" id="fSaturate" min="0" max="200" value="100"></div>
-                        <div><span class="text-[10px] text-gray-500">Blur</span> <input type="range" id="fBlur" min="0" max="20" value="0"></div>
-                    </div>
-                </section>
-
-                <!-- Text Options -->
-                <section id="textOptions" class="hidden space-y-4 border-t border-white/5 pt-4">
-                    <span class="group-label">អត្ថបទ</span>
-                    <textarea id="lText" placeholder="បញ្ចូលអត្ថបទ..."></textarea>
-                    <select id="lFont">
-                        <option value="'Kantumruy Pro'">Kantumruy Pro</option>
-                        <option value="'Moul'">Moul (មូល)</option>
-                        <option value="'Siemreap'">Siemreap</option>
-                    </select>
-                    <input type="color" id="lColor" class="h-8">
-                </section>
-
-                <!-- Waveform Options -->
-                <section id="waveOptions" class="hidden space-y-4 border-t border-white/5 pt-4">
-                    <span class="group-label">រលកសម្លេង</span>
-                    <select id="lWaveStyle">
-                        <option value="bars">Bars</option>
-                        <option value="symmetric">Symmetric</option>
-                        <option value="circle">Circle</option>
-                    </select>
-                </section>
-                
-                <!-- Animation -->
-                <section class="space-y-4 border-t border-white/5 pt-4">
-                    <span class="group-label">Animation</span>
-                    <div class="flex gap-2">
-                        <label class="text-[10px] flex items-center gap-1"><input type="checkbox" id="animFadeIn"> Fade In</label>
-                        <label class="text-[10px] flex items-center gap-1"><input type="checkbox" id="animFadeOut"> Fade Out</label>
-                    </div>
-                </section>
+                </div>
             </div>
-        </aside>
+
+            <!-- Timeline -->
+            <div class="timeline-container flex flex-col shadow-inner">
+                <div class="h-12 flex items-center gap-6 px-4 border-b border-white/5">
+                    <button id="playBtn" class="w-10 h-10 flex items-center justify-center hover:bg-white/5 rounded-full transition">
+                        <svg id="playIcon" class="w-5 h-5 fill-white" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.841z"/></svg>
+                    </button>
+                    <span id="timeDisplay" class="text-[11px] font-mono text-gray-400">00:00 / 00:00</span>
+                    <div class="flex gap-2 ml-auto">
+                        <button onclick="zoomTimeline(0.8)" class="px-2 py-1 text-xs hover:bg-white/5 rounded">-</button>
+                        <span class="text-xs text-gray-500">Zoom</span>
+                        <button onclick="zoomTimeline(1.2)" class="px-2 py-1 text-xs hover:bg-white/5 rounded">+</button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto relative" id="timelineArea">
+                    <div id="timelineTracks"></div>
+                    <div class="playhead" id="playhead"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Timeline Area -->
-    <div class="timeline flex flex-col">
-        <div class="flex items-center px-6 h-12 border-b border-white/5 gap-6">
-            <button id="playBtn" class="bg-white text-black rounded-full p-2 hover:scale-110 transition">
-                <svg id="playIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <div id="timeText" class="text-[11px] font-mono text-gray-500">00:00 / 00:00</div>
-        </div>
-        <div class="flex-1 overflow-x-auto relative" id="tlScrollContainer">
-            <div id="tlTracks" class="relative min-w-full">
-                <!-- Playhead is inside here -->
-                <div class="playhead" id="playhead"></div>
-            </div>
-        </div>
-    </div>
+    <video id="sourceVideo" class="hidden" crossorigin="anonymous" playsinline></video>
 
-    <video id="vSource" class="hidden" crossorigin="anonymous"></video>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // Firebase Mock
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        signInAnonymously(auth);
-
+    <script>
         const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        const vSource = document.getElementById('vSource');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const video = document.getElementById('sourceVideo');
         const playBtn = document.getElementById('playBtn');
         const playhead = document.getElementById('playhead');
-        
+
         let layers = [];
-        let activeIdx = -1;
+        let activeIndex = -1;
         let isDragging = false;
         let startX, startY;
         let audioCtx, analyzer, dataArray;
-        let zoom = 1;
+        let history = [];
+        let historyIndex = -1;
+        let timelineZoom = 1;
+        let currentFilter = {
+            type: 'none',
+            brightness: 100,
+            contrast: 100,
+            saturation: 100
+        };
+
+        const stickers = ['😀','😂','😍','🥳','😎','🤩','😭','😱','🤔','😴','👍','👎','👏','🙏','💪','✌️','🤘','👌','🎉','🎊','🎈','🎁','🎂','🎵','🎶','🎤','🎧','🎸','🎹','🎺','🎻','🎮','🎯','🎲','🎰','🚀','✈️','🚗','🚕','🚙','🚌','🚎','🏍','🚲','🛴','🚁','⛵','🚤','⛴','🚀','💎','👑','💍','💄','👠','👗','👔','🎩','🧢','👓','🕶','🌈','⭐','✨','💫','⚡','🔥','💥','💨','☁️','🌙','☀️','⛅','🌤','⛈','🌧','❄️','☃️','⛄','🌸','🌺','🌻','🌷','🌹','🥀','🌴','🌲','🌳','🍀','🍁','🍂','🍃'];
 
         class Layer {
             constructor(type) {
-                this.id = Date.now();
+                this.id = Date.now() + Math.random();
                 this.type = type;
-                this.name = type;
+                this.name = type === 'waveform' ? 'រលកសម្លេង' : type === 'text' ? 'អត្ថបទ' : type === 'sticker' ? 'Sticker' : type === 'image' ? 'រូបភាព' : 'រាង';
                 this.x = canvas.width / 2;
                 this.y = canvas.height / 2;
                 this.scale = 1;
-                this.rotate = 0;
+                this.rotation = 0;
                 this.opacity = 1;
-                this.color = '#ffffff';
+                this.color = type === 'waveform' ? '#2c64f8' : '#ffffff';
                 this.text = 'អត្ថបទថ្មី';
                 this.font = "'Kantumruy Pro'";
+                this.shadow = true;
+                this.outline = false;
                 this.waveStyle = 'bars';
-                this.filters = { brightness: 100, contrast: 100, saturate: 100, blur: 0 };
-                this.anim = { fadeIn: true, fadeOut: true };
-                this.startTime = 0;
-                this.duration = 5; // seconds
-            }
-        }
-
-        function init() {
-            canvas.width = 1280;
-            canvas.height = 720;
-            requestAnimationFrame(renderLoop);
-        }
-
-        window.addLayer = (type) => {
-            const l = new Layer(type);
-            if(type === 'waveform') l.y = canvas.height - 150;
-            layers.push(l);
-            selectLayer(layers.length - 1);
-            if(type === 'waveform' && vSource.src) initAudio();
-        };
-
-        function selectLayer(idx) {
-            activeIdx = idx;
-            const editor = document.getElementById('layerEditor');
-            const none = document.getElementById('noSelection');
-            
-            if(idx === -1) {
-                editor.classList.add('hidden');
-                none.classList.remove('hidden');
-            } else {
-                editor.classList.remove('hidden');
-                none.classList.add('hidden');
-                const l = layers[idx];
-                
-                document.getElementById('lScale').value = l.scale;
-                document.getElementById('lRotate').value = l.rotate;
-                document.getElementById('lOpacity').value = l.opacity;
-                document.getElementById('lText').value = l.text;
-                document.getElementById('lColor').value = l.color;
-                document.getElementById('lWaveStyle').value = l.waveStyle;
-                
-                // Show/Hide specific options
-                document.getElementById('textOptions').classList.toggle('hidden', l.type !== 'text');
-                document.getElementById('waveOptions').classList.toggle('hidden', l.type !== 'waveform');
-                document.getElementById('videoFilters').classList.toggle('hidden', l.type !== 'video');
-            }
-            renderTimeline();
-        }
-
-        // Render Loop
-        function renderLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw Video First
-            if(vSource.readyState >= 2) {
-                ctx.save();
-                // Apply Filters if any (e.g. from a video layer)
-                ctx.drawImage(vSource, 0, 0, canvas.width, canvas.height);
-                ctx.restore();
-            } else {
-                ctx.fillStyle = '#0a0a0a';
-                ctx.fillRect(0,0, canvas.width, canvas.height);
-            }
-
-            layers.forEach((l, i) => {
-                // Check Timing
-                const currentTime = vSource.currentTime;
-                // Simple logic: show all for now, but in future filter by l.startTime
-                
-                ctx.save();
-                ctx.globalAlpha = l.opacity;
-                ctx.translate(l.x, l.y);
-                ctx.rotate(l.rotate * Math.PI / 180);
-                ctx.scale(l.scale, l.scale);
-
-                if(l.type === 'text') {
-                    ctx.font = `bold 40px ${l.font}`;
-                    ctx.fillStyle = l.color;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(l.text, 0, 0);
-                } else if(l.type === 'waveform' && analyzer) {
-                    analyzer.getByteFrequencyData(dataArray);
-                    ctx.fillStyle = l.color;
-                    const count = 60;
-                    const w = 400;
-                    const bW = (w / count);
-                    for(let j=0; j<count; j++) {
-                        const h = (dataArray[j]/255) * 100;
-                        if(l.waveStyle === 'bars') ctx.fillRect(-w/2 + j*bW, -h/2, bW-2, h);
-                        else if(l.waveStyle === 'symmetric') ctx.fillRect(-w/2 + j*bW, -h, bW-2, h*2);
-                        else if(l.waveStyle === 'circle') {
-                            const ang = (j/count) * Math.PI * 2;
-                            ctx.fillRect(Math.cos(ang)*50, Math.sin(ang)*50, bW, h/2);
-                        }
-                    }
-                } else if(l.type === 'shape') {
-                    ctx.fillStyle = l.color;
-                    ctx.fillRect(-50, -50, 100, 100);
-                }
-
-                if(i === activeIdx) {
-                    ctx.strokeStyle = '#3b82f6';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(-60, -60, 120, 120);
-                }
-                ctx.restore();
-            });
-
-            // Playhead logic
-            if(vSource.duration) {
-                const ratio = vSource.currentTime / vSource.duration;
-                playhead.style.left = (ratio * 100) + '%';
-                document.getElementById('timeText').innerText = formatTime(vSource.currentTime) + " / " + formatTime(vSource.duration);
-            }
-
-            requestAnimationFrame(renderLoop);
-        }
-
-        // Timeline & Interaction
-        function renderTimeline() {
-            const container = document.getElementById('tlTracks');
-            // Clear but keep playhead
-            const existingClips = container.querySelectorAll('.clip');
-            existingClips.forEach(c => c.remove());
-
-            layers.forEach((l, i) => {
-                const clip = document.createElement('div');
-                clip.className = `clip ${i === activeIdx ? 'active' : ''}`;
-                clip.style.top = (i * 42) + 'px';
-                clip.style.left = '0%';
-                clip.style.width = '80%'; // Mock width
-                clip.onclick = (e) => { e.stopPropagation(); selectLayer(i); };
-                container.appendChild(clip);
-            });
-        }
-
-        // Handlers
-        vSource.onloadedmetadata = () => renderTimeline();
-        document.getElementById('videoInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if(file) vSource.src = URL.createObjectURL(file);
-        };
-
-        playBtn.onclick = () => {
-            if(vSource.paused) {
-                vSource.play();
-                document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-            } else {
-                vSource.pause();
-                document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
-            }
-        };
-
-        async function initAudio() {
-            if(!audioCtx) {
-                audioCtx = new AudioContext();
-                const src = audioCtx.createMediaElementSource(vSource);
-                analyzer = audioCtx.createAnalyser();
-                src.connect(analyzer);
-                analyzer.connect(audioCtx.destination);
-                dataArray = new Uint8Array(analyzer.frequencyBinCount);
-            }
-        }
-
-        function formatTime(s) {
-            const m = Math.floor(s/60);
-            const sec = Math.floor(s%60);
-            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
-        }
-
-        // Inspector Binding
-        document.getElementById('lScale').oninput = e => layers[activeIdx].scale = e.target.value;
-        document.getElementById('lRotate').oninput = e => layers[activeIdx].rotate = e.target.value;
-        document.getElementById('lOpacity').oninput = e => layers[activeIdx].opacity = e.target.value;
-        document.getElementById('lText').oninput = e => layers[activeIdx].text = e.target.value;
-        document.getElementById('lColor').oninput = e => layers[activeIdx].color = e.target.value;
-        document.getElementById('lWaveStyle').onchange = e => layers[activeIdx].waveStyle = e.target.value;
-
-        // Drag Logic
-        canvas.onmousedown = (e) => {
-            const r = canvas.getBoundingClientRect();
-            const mx = (e.clientX - r.left) * (canvas.width/r.width);
-            const my = (e.clientY - r.top) * (canvas.height/r.height);
-            
-            for(let i=layers.length-1; i>=0; i--) {
-                const l = layers[i];
-                if(Math.abs(mx - l.x) < 50 && Math.abs(my - l.y) < 50) {
-                    selectLayer(i);
-                    isDragging = true;
-                    startX = mx - l.x; startY = my - l.y;
-                    return;
-                }
-            }
-            selectLayer(-1);
-        };
-        window.onmousemove = (e) => {
-            if(!isDragging || activeIdx === -1) return;
-            const r = canvas.getBoundingClientRect();
-            const mx = (e.clientX - r.left) * (canvas.width/r.width);
-            const my = (e.clientY - r.top) * (canvas.height/r.height);
-            // Phase 1: Boundary Protection
-            layers[activeIdx].x = Math.max(0, Math.min(canvas.width, mx - startX));
-            layers[activeIdx].y = Math.max(0, Math.min(canvas.height, my - startY));
-        };
-        window.onmouseup = () => isDragging = false;
-
-        window.exportVideo = () => {
-            const q = parseInt(document.getElementById('exportQuality').value);
-            // Real HD rendering logic using canvas capture
-            const stream = canvas.captureStream(30);
-            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm', videoBitsPerSecond: 8000000 * q });
-            const chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = 'Wavevoice_Export.webm'; a.click();
-            };
-            recorder.start();
-            vSource.currentTime = 0; vSource.play();
-            setTimeout(() => recorder.stop(), vSource.duration * 1000);
-        };
-
-        init();
-    </script>
-</body>
-</html>
+                this.shape = 'rectangle';
+                this.sticker = '😀';
+                this.animation = 'none';
