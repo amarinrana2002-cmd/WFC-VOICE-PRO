@@ -3,226 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavevoice Pro Video Editor - Ultra HD</title>
+    <title>Wavevoice Pro Ultimate Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- បញ្ចូល Fonts ខ្មែរពី Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Freehand&family=Kantumruy+Pro:wght@400;700&family=Moul&family=Siemreap&family=Chenla&display=swap" rel="stylesheet">
     <style>
         :root {
-            --capcut-bg: #0a0a0a;
-            --capcut-panel: #141414;
-            --capcut-accent: #2c64f8;
-            --capcut-border: rgba(255, 255, 255, 0.05);
+            --bg: #050505;
+            --panel: #111111;
+            --accent: #3b82f6;
+            --border: rgba(255, 255, 255, 0.08);
         }
-
-        body { 
-            font-family: 'Inter', 'Kantumruy Pro', sans-serif; 
-            background-color: var(--capcut-bg); 
-            color: #e2e2e2; 
-            overflow: hidden; 
-            user-select: none;
-        }
-
-        .glass-panel { background: var(--capcut-panel); border: 1px solid var(--capcut-border); }
-        
-        .canvas-area {
-            position: relative;
-            max-width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        }
-
-        #mainCanvas { width: 100%; height: 100%; }
-
-        .timeline-container {
-            height: 280px;
-            background: #0f0f0f;
-            border-top: 1px solid var(--capcut-border);
-        }
-
-        .timeline-track {
-            height: 44px;
-            margin: 2px 0;
-            background: rgba(255,255,255,0.02);
-            display: flex;
-            align-items: center;
-            padding-left: 150px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .timeline-track:hover { background: rgba(255,255,255,0.05); }
-
-        .track-label {
-            position: absolute; left: 0; width: 140px; height: 100%;
-            background: #181818; display: flex; align-items: center;
-            padding: 0 12px; font-size: 11px; border-right: 1px solid var(--capcut-border);
-            z-index: 5; color: #aaa; overflow: hidden; white-space: nowrap;
-        }
-
-        .clip-block {
-            background: var(--capcut-accent); height: 34px; border-radius: 4px; opacity: 0.7;
-            box-shadow: 0 0 10px rgba(44, 100, 248, 0.3);
-        }
-
-        .playhead {
-            position: absolute; top: 0; bottom: 0; width: 2px; background: #ff3e3e;
-            left: 150px; z-index: 20; pointer-events: none;
-        }
-
-        .active-layer { background: rgba(44, 100, 248, 0.2) !important; border: 1px solid var(--capcut-accent) !important; }
-
-        .cap-btn {
-            display: flex; flex-direction: column; align-items: center; padding: 12px;
-            border-radius: 10px; color: #777; transition: 0.3s;
-        }
-        .cap-btn:hover { color: #fff; background: #1a1a1a; }
-        .cap-btn.active { color: var(--capcut-accent); }
-
-        input[type="range"] { accent-color: var(--capcut-accent); }
+        body { font-family: 'Kantumruy Pro', sans-serif; background: var(--bg); color: #fff; overflow: hidden; }
+        .editor-container { display: grid; grid-template-columns: 80px 1fr 320px; height: calc(100vh - 56px); }
+        .canvas-container { background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        canvas { box-shadow: 0 0 40px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; background: #000; }
+        .inspector { background: var(--panel); border-left: 1px solid var(--border); overflow-y: auto; }
+        .timeline { height: 300px; background: #0a0a0a; border-top: 1px solid var(--border); position: relative; }
+        .track { height: 40px; background: rgba(255,255,255,0.02); margin-bottom: 2px; position: relative; display: flex; align-items: center; }
+        .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #ef4444; z-index: 50; pointer-events: none; }
+        .clip { position: absolute; height: 32px; background: var(--accent); border-radius: 4px; opacity: 0.8; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .clip.active { border: 2px solid #fff; box-shadow: 0 0 15px var(--accent); }
+        .cap-btn { flex-direction: column; display: flex; align-items: center; padding: 12px 0; color: #666; transition: 0.2s; font-size: 10px; }
+        .cap-btn:hover, .cap-btn.active { color: #fff; background: rgba(255,255,255,0.05); }
+        input[type="range"] { accent-color: var(--accent); height: 4px; }
+        select, input[type="text"], textarea { background: #1a1a1a; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 12px; color: #fff; width: 100%; outline: none; }
+        .group-label { font-size: 10px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
     </style>
 </head>
-<body class="flex flex-col h-screen">
+<body>
 
     <!-- Header -->
-    <header class="h-14 border-b border-white/5 flex items-center justify-between px-8 bg-[#000]">
-        <div class="flex items-center gap-4">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">W</div>
-            <h1 class="font-bold text-sm tracking-widest uppercase">Wavevoice <span class="text-blue-500">Ultra HD</span></h1>
+    <header class="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-black">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-bold">W</div>
+            <span class="text-xs font-black tracking-tighter uppercase">Wavevoice <span class="text-blue-500">Ultimate</span></span>
         </div>
-        <div class="flex gap-3">
-            <select id="exportQuality" class="bg-[#1a1a1a] text-[11px] px-3 py-1 rounded border border-white/10 text-gray-400">
-                <option value="1">720p (Normal)</option>
-                <option value="2" selected>1080p (Full HD)</option>
-                <option value="4">4K (Ultra HD)</option>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center bg-[#1a1a1a] rounded-lg px-3 py-1 gap-3">
+                <span class="text-[10px] text-gray-500">ZOOM</span>
+                <input type="range" id="tlZoom" min="1" max="10" step="0.5" value="1" class="w-24">
+            </div>
+            <select id="exportQuality" class="!w-32 bg-[#1a1a1a]">
+                <option value="1">720p</option>
+                <option value="2" selected>1080p HD</option>
+                <option value="4">4K Ultra</option>
             </select>
-            <button onclick="exportVideoHD()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-full text-[11px] font-black transition-all transform hover:scale-105">
-                EXPORT HD
-            </button>
+            <button onclick="exportVideo()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-1.5 rounded-full text-xs font-bold transition">EXPORT</button>
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
-        <!-- Sidebar Tools -->
-        <aside class="w-24 border-r border-white/5 flex flex-col py-6 gap-3 bg-[#000]">
+    <div class="editor-container">
+        <!-- Toolbar -->
+        <aside class="border-r border-white/5 bg-black flex flex-col pt-4">
             <button onclick="document.getElementById('videoInput').click()" class="cap-btn">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="1.5"/></svg>
-                <span class="text-[10px] mt-2">មេឌៀ</span>
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
+                Media
             </button>
-            <button onclick="addTextLayer()" class="cap-btn">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-width="1.5"/></svg>
-                <span class="text-[10px] mt-2">អត្ថបទ</span>
+            <button onclick="addLayer('text')" class="cap-btn">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7" stroke-width="2"/></svg>
+                Text
             </button>
-            <button onclick="addWaveform()" class="cap-btn">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V5l12 7-12 7z" stroke-width="1.5"/></svg>
-                <span class="text-[10px] mt-2">រលកសម្លេង</span>
+            <button onclick="addLayer('waveform')" class="cap-btn">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19V5l12 7-12 7z" stroke-width="2"/></svg>
+                Audio
+            </button>
+            <button onclick="addLayer('shape')" class="cap-btn">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 5h16v14H4z" stroke-width="2"/></svg>
+                Shapes
             </button>
             <input type="file" id="videoInput" accept="video/*" class="hidden">
         </aside>
 
-        <!-- Main Workspace -->
-        <div class="flex-1 flex flex-col bg-[#0d0d0d]">
-            <div class="flex-1 flex items-center justify-center p-10 relative">
-                <div class="canvas-area overflow-hidden" id="canvasContainer">
-                    <canvas id="mainCanvas"></canvas>
-                </div>
+        <!-- Preview -->
+        <main class="canvas-container">
+            <canvas id="mainCanvas"></canvas>
+        </main>
 
-                <!-- Inspector Panel -->
-                <div id="inspector" class="absolute right-8 top-8 w-72 glass-panel rounded-2xl p-6 hidden z-50 max-h-[80%] overflow-y-auto shadow-2xl">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-[12px] font-bold text-blue-500 uppercase tracking-widest text-center">ការកំណត់ LAYER</h3>
-                        <button onclick="selectLayer(-1)" class="text-gray-500 hover:text-white">✕</button>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div class="space-y-3">
-                            <label class="text-[10px] text-gray-500 uppercase font-bold">ឈ្មោះ Layer</label>
-                            <input type="text" id="layerName" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 outline-none focus:border-blue-500">
-                        </div>
-
-                        <div id="textSettings" class="hidden space-y-5">
-                            <div class="space-y-3">
-                                <label class="text-[10px] text-gray-500 uppercase font-bold">អត្ថបទ</label>
-                                <textarea id="layerText" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 h-20 outline-none focus:border-blue-500"></textarea>
-                            </div>
-                            <div class="space-y-3">
-                                <label class="text-[10px] text-gray-500 uppercase font-bold">ពុម្ពអក្សរ</label>
-                                <select id="layerFont" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 outline-none">
-                                    <option value="'Kantumruy Pro'">Kantumruy Pro</option>
-                                    <option value="'Siemreap'">Siemreap</option>
-                                    <option value="'Moul'">Moul</option>
-                                    <option value="'Chenla'">Chenla</option>
-                                    <option value="'Freehand'">Freehand</option>
-                                </select>
-                            </div>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 text-[10px] text-gray-400">
-                                    <input type="checkbox" id="textShadow"> ស្រមោល
-                                </label>
-                                <label class="flex items-center gap-2 text-[10px] text-gray-400">
-                                    <input type="checkbox" id="textOutline"> គំនូសជុំវិញ
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="waveSettings" class="hidden space-y-5">
-                            <div class="space-y-2">
-                                <label class="text-[10px] text-gray-500 uppercase font-bold">ម៉ូដរលក</label>
-                                <select id="waveStyle" class="w-full bg-[#1a1a1a] text-xs p-3 rounded-lg border border-white/5 outline-none">
-                                    <option value="bars">Bars Classic</option>
-                                    <option value="symmetric">Symmetric</option>
-                                    <option value="circle">Center Circle</option>
-                                    <option value="blocks">Digital Blocks</option>
-                                    <option value="fire">Fire Peaks</option>
-                                    <option value="heartbeat">Heartbeat</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4 pt-4 border-t border-white/5">
-                            <div class="space-y-2">
-                                <div class="flex justify-between text-[10px]"><span>ទំហំ (Scale)</span><span id="scaleVal">100%</span></div>
-                                <input type="range" id="layerScale" min="0.1" max="5" step="0.1" class="w-full h-1 bg-gray-800 rounded-full">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] block text-gray-500 uppercase font-bold">ពណ៌ Layer</label>
-                                <input type="color" id="layerColor" class="w-full h-10 bg-transparent border-none cursor-pointer">
-                            </div>
-                        </div>
-
-                        <button onclick="deleteLayer()" class="w-full py-3 bg-red-950/20 text-red-500 text-[10px] rounded-xl font-bold hover:bg-red-900/40 transition">លុប LAYER</button>
-                    </div>
-                </div>
+        <!-- Inspector -->
+        <aside class="inspector p-5 space-y-6">
+            <div id="noSelection" class="text-center py-20 text-gray-600 text-xs">
+                សូមជ្រើសរើស Layer ដើម្បីកំណត់
             </div>
 
-            <!-- Timeline UI -->
-            <div class="timeline-container flex flex-col shadow-inner">
-                <div class="timeline-header h-12 border-b border-white/5 flex items-center px-6">
-                    <div class="flex items-center gap-6">
-                        <button id="playBtn" class="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full transition">
-                            <svg id="playIcon" class="w-5 h-5 fill-white" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.841z"/></svg>
-                        </button>
-                        <span id="timeDisplay" class="text-[11px] font-mono text-gray-500">00:00:00 / 00:00:00</span>
-                    </div>
+            <div id="layerEditor" class="hidden space-y-6">
+                <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                    <h3 class="text-xs font-bold text-blue-500 uppercase">ការកំណត់ Layer</h3>
+                    <button onclick="deleteLayer()" class="text-red-500 text-[10px] hover:underline">លុប</button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto relative" id="timelineArea">
-                    <div id="timelineTracks"></div>
-                    <div class="playhead" id="playhead"></div>
-                </div>
+                <!-- Basic Transforms -->
+                <section class="space-y-4">
+                    <span class="group-label">មូលដ្ឋាន</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <span class="text-[10px] text-gray-500">Scale</span>
+                            <input type="range" id="lScale" min="0.1" max="5" step="0.01">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] text-gray-500">Rotate</span>
+                            <input type="range" id="lRotate" min="0" max="360" step="1">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-[10px] text-gray-500">Opacity</span>
+                        <input type="range" id="lOpacity" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </section>
+
+                <!-- Video Filters -->
+                <section id="videoFilters" class="hidden space-y-4 border-t border-white/5 pt-4">
+                    <span class="group-label">Video Filters</span>
+                    <div class="space-y-3">
+                        <div><span class="text-[10px] text-gray-500">Brightness</span> <input type="range" id="fBright" min="0" max="200" value="100"></div>
+                        <div><span class="text-[10px] text-gray-500">Contrast</span> <input type="range" id="fContrast" min="0" max="200" value="100"></div>
+                        <div><span class="text-[10px] text-gray-500">Saturation</span> <input type="range" id="fSaturate" min="0" max="200" value="100"></div>
+                        <div><span class="text-[10px] text-gray-500">Blur</span> <input type="range" id="fBlur" min="0" max="20" value="0"></div>
+                    </div>
+                </section>
+
+                <!-- Text Options -->
+                <section id="textOptions" class="hidden space-y-4 border-t border-white/5 pt-4">
+                    <span class="group-label">អត្ថបទ</span>
+                    <textarea id="lText" placeholder="បញ្ចូលអត្ថបទ..."></textarea>
+                    <select id="lFont">
+                        <option value="'Kantumruy Pro'">Kantumruy Pro</option>
+                        <option value="'Moul'">Moul (មូល)</option>
+                        <option value="'Siemreap'">Siemreap</option>
+                    </select>
+                    <input type="color" id="lColor" class="h-8">
+                </section>
+
+                <!-- Waveform Options -->
+                <section id="waveOptions" class="hidden space-y-4 border-t border-white/5 pt-4">
+                    <span class="group-label">រលកសម្លេង</span>
+                    <select id="lWaveStyle">
+                        <option value="bars">Bars</option>
+                        <option value="symmetric">Symmetric</option>
+                        <option value="circle">Circle</option>
+                    </select>
+                </section>
+                
+                <!-- Animation -->
+                <section class="space-y-4 border-t border-white/5 pt-4">
+                    <span class="group-label">Animation</span>
+                    <div class="flex gap-2">
+                        <label class="text-[10px] flex items-center gap-1"><input type="checkbox" id="animFadeIn"> Fade In</label>
+                        <label class="text-[10px] flex items-center gap-1"><input type="checkbox" id="animFadeOut"> Fade Out</label>
+                    </div>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Timeline Area -->
+    <div class="timeline flex flex-col">
+        <div class="flex items-center px-6 h-12 border-b border-white/5 gap-6">
+            <button id="playBtn" class="bg-white text-black rounded-full p-2 hover:scale-110 transition">
+                <svg id="playIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div id="timeText" class="text-[11px] font-mono text-gray-500">00:00 / 00:00</div>
+        </div>
+        <div class="flex-1 overflow-x-auto relative" id="tlScrollContainer">
+            <div id="tlTracks" class="relative min-w-full">
+                <!-- Playhead is inside here -->
+                <div class="playhead" id="playhead"></div>
             </div>
         </div>
     </div>
 
-    <video id="sourceVideo" class="hidden" crossorigin="anonymous" playsinline></video>
+    <video id="vSource" class="hidden" crossorigin="anonymous"></video>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+        // Firebase Mock
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -230,286 +185,252 @@
 
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
-        const video = document.getElementById('sourceVideo');
+        const vSource = document.getElementById('vSource');
         const playBtn = document.getElementById('playBtn');
         const playhead = document.getElementById('playhead');
-
+        
         let layers = [];
-        let activeIndex = -1;
+        let activeIdx = -1;
         let isDragging = false;
         let startX, startY;
         let audioCtx, analyzer, dataArray;
+        let zoom = 1;
 
         class Layer {
             constructor(type) {
                 this.id = Date.now();
                 this.type = type;
-                this.name = type === 'waveform' ? 'រលកសម្លេង' : 'អត្ថបទថ្មី';
+                this.name = type;
                 this.x = canvas.width / 2;
                 this.y = canvas.height / 2;
                 this.scale = 1;
-                this.color = type === 'waveform' ? '#2c64f8' : '#ffffff';
-                this.text = 'សរសេរអត្ថបទទីនេះ';
+                this.rotate = 0;
+                this.opacity = 1;
+                this.color = '#ffffff';
+                this.text = 'អត្ថបទថ្មី';
                 this.font = "'Kantumruy Pro'";
-                this.shadow = true;
-                this.outline = false;
                 this.waveStyle = 'bars';
+                this.filters = { brightness: 100, contrast: 100, saturate: 100, blur: 0 };
+                this.anim = { fadeIn: true, fadeOut: true };
+                this.startTime = 0;
+                this.duration = 5; // seconds
             }
         }
 
         function init() {
-            resize();
-            requestAnimationFrame(draw);
+            canvas.width = 1280;
+            canvas.height = 720;
+            requestAnimationFrame(renderLoop);
         }
 
-        function resize() {
-            const container = document.getElementById('canvasContainer');
-            if (container) {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-            }
-        }
-        window.onresize = resize;
-
-        window.addTextLayer = () => {
-            layers.push(new Layer('text'));
-            selectLayer(layers.length - 1);
-        };
-
-        window.addWaveform = () => {
-            const l = new Layer('waveform');
-            l.y = canvas.height - 100;
+        window.addLayer = (type) => {
+            const l = new Layer(type);
+            if(type === 'waveform') l.y = canvas.height - 150;
             layers.push(l);
             selectLayer(layers.length - 1);
-            if(video.src) initAudio();
+            if(type === 'waveform' && vSource.src) initAudio();
         };
 
-        function selectLayer(index) {
-            activeIndex = index;
-            const inspector = document.getElementById('inspector');
-            const textSettings = document.getElementById('textSettings');
-            const waveSettings = document.getElementById('waveSettings');
+        function selectLayer(idx) {
+            activeIdx = idx;
+            const editor = document.getElementById('layerEditor');
+            const none = document.getElementById('noSelection');
             
-            if(index === -1) {
-                inspector.classList.add('hidden');
+            if(idx === -1) {
+                editor.classList.add('hidden');
+                none.classList.remove('hidden');
             } else {
-                const l = layers[index];
-                inspector.classList.remove('hidden');
-                document.getElementById('layerName').value = l.name;
-                document.getElementById('layerScale').value = l.scale;
-                document.getElementById('scaleVal').innerText = Math.round(l.scale * 100) + '%';
-                document.getElementById('layerColor').value = l.color;
-
-                textSettings.classList.toggle('hidden', l.type !== 'text');
-                waveSettings.classList.toggle('hidden', l.type !== 'waveform');
-
-                if(l.type === 'text') {
-                    document.getElementById('layerText').value = l.text;
-                    document.getElementById('layerFont').value = l.font;
-                    document.getElementById('textShadow').checked = l.shadow;
-                    document.getElementById('textOutline').checked = l.outline;
-                } else if(l.type === 'waveform') {
-                    document.getElementById('waveStyle').value = l.waveStyle;
-                }
+                editor.classList.remove('hidden');
+                none.classList.add('hidden');
+                const l = layers[idx];
+                
+                document.getElementById('lScale').value = l.scale;
+                document.getElementById('lRotate').value = l.rotate;
+                document.getElementById('lOpacity').value = l.opacity;
+                document.getElementById('lText').value = l.text;
+                document.getElementById('lColor').value = l.color;
+                document.getElementById('lWaveStyle').value = l.waveStyle;
+                
+                // Show/Hide specific options
+                document.getElementById('textOptions').classList.toggle('hidden', l.type !== 'text');
+                document.getElementById('waveOptions').classList.toggle('hidden', l.type !== 'waveform');
+                document.getElementById('videoFilters').classList.toggle('hidden', l.type !== 'video');
             }
             renderTimeline();
         }
 
-        window.deleteLayer = () => {
-            if(activeIndex !== -1) {
-                layers.splice(activeIndex, 1);
-                selectLayer(-1);
-            }
-        };
-
-        function renderTimeline() {
-            const container = document.getElementById('timelineTracks');
-            container.innerHTML = '';
-            layers.forEach((l, i) => {
-                const track = document.createElement('div');
-                track.className = `timeline-track ${i === activeIndex ? 'active-layer' : ''}`;
-                track.onclick = () => selectLayer(i);
-                track.innerHTML = `<div class="track-label">${l.name}</div><div class="clip-block" style="width: 80%; background: ${l.color}"></div>`;
-                container.appendChild(track);
-            });
-        }
-
-        function draw() {
+        // Render Loop
+        function renderLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            if(video.readyState >= 2) {
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Draw Video First
+            if(vSource.readyState >= 2) {
+                ctx.save();
+                // Apply Filters if any (e.g. from a video layer)
+                ctx.drawImage(vSource, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
             } else {
-                ctx.fillStyle = '#050505';
+                ctx.fillStyle = '#0a0a0a';
                 ctx.fillRect(0,0, canvas.width, canvas.height);
             }
 
             layers.forEach((l, i) => {
+                // Check Timing
+                const currentTime = vSource.currentTime;
+                // Simple logic: show all for now, but in future filter by l.startTime
+                
                 ctx.save();
+                ctx.globalAlpha = l.opacity;
+                ctx.translate(l.x, l.y);
+                ctx.rotate(l.rotate * Math.PI / 180);
+                ctx.scale(l.scale, l.scale);
+
                 if(l.type === 'text') {
-                    ctx.font = `bold ${36 * l.scale}px ${l.font}`;
-                    ctx.textAlign = 'center';
-                    if(l.shadow) {
-                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                        ctx.shadowBlur = 10;
-                        ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4;
-                    }
-                    if(l.outline) {
-                        ctx.strokeStyle = '#000';
-                        ctx.lineWidth = 6 * l.scale;
-                        ctx.strokeText(l.text, l.x, l.y);
-                    }
+                    ctx.font = `bold 40px ${l.font}`;
                     ctx.fillStyle = l.color;
-                    ctx.fillText(l.text, l.x, l.y);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(l.text, 0, 0);
                 } else if(l.type === 'waveform' && analyzer) {
                     analyzer.getByteFrequencyData(dataArray);
                     ctx.fillStyle = l.color;
-                    const count = 50;
-                    const barWidth = (canvas.width * 0.7 / count) * l.scale;
-
+                    const count = 60;
+                    const w = 400;
+                    const bW = (w / count);
                     for(let j=0; j<count; j++) {
-                        const h = (dataArray[j]/255) * 120 * l.scale;
-                        const px = l.x + (j * barWidth);
-                        const py = l.y;
-
-                        if(l.waveStyle === 'bars') {
-                            ctx.fillRect(px, py - h/2, barWidth - 4, h);
-                        } else if(l.waveStyle === 'symmetric') {
-                            ctx.fillRect(px, py - h, barWidth - 4, h * 2);
-                        } else if(l.waveStyle === 'circle') {
+                        const h = (dataArray[j]/255) * 100;
+                        if(l.waveStyle === 'bars') ctx.fillRect(-w/2 + j*bW, -h/2, bW-2, h);
+                        else if(l.waveStyle === 'symmetric') ctx.fillRect(-w/2 + j*bW, -h, bW-2, h*2);
+                        else if(l.waveStyle === 'circle') {
                             const ang = (j/count) * Math.PI * 2;
-                            const rx = l.x + Math.cos(ang) * (60 * l.scale + h);
-                            const ry = l.y + Math.sin(ang) * (60 * l.scale + h);
-                            ctx.fillRect(rx, ry, barWidth/2, barWidth/2);
-                        } else if(l.waveStyle === 'blocks') {
-                            const bs = 10 * l.scale;
-                            for(let k=0; k<h/bs; k++) ctx.fillRect(px, py - (k * bs * 1.2), barWidth-2, bs);
-                        } else if(l.waveStyle === 'fire') {
-                            ctx.globalAlpha = 0.5;
-                            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + barWidth/2, py-h*1.5); ctx.lineTo(px+barWidth, py); ctx.fill();
-                            ctx.globalAlpha = 1;
-                            ctx.beginPath(); ctx.moveTo(px+2, py); ctx.lineTo(px + barWidth/2, py-h); ctx.lineTo(px+barWidth-2, py); ctx.fill();
-                        } else if(l.waveStyle === 'heartbeat') {
-                            const modH = j%8 === 0 ? h*2 : h/3;
-                            ctx.fillRect(px, py - modH, barWidth-2, modH*2);
+                            ctx.fillRect(Math.cos(ang)*50, Math.sin(ang)*50, bW, h/2);
                         }
                     }
+                } else if(l.type === 'shape') {
+                    ctx.fillStyle = l.color;
+                    ctx.fillRect(-50, -50, 100, 100);
                 }
 
-                if(i === activeIndex) {
-                    ctx.strokeStyle = '#2c64f8';
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeRect(l.x - 100, l.y - 40, 200, 60);
-                    ctx.setLineDash([]);
+                if(i === activeIdx) {
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-60, -60, 120, 120);
                 }
                 ctx.restore();
             });
 
-            if(video.src && video.duration) {
-                const progress = video.currentTime / video.duration;
-                const timelineWidth = document.getElementById('timelineTracks').clientWidth - 150;
-                playhead.style.left = (150 + (progress * timelineWidth)) + 'px';
-                document.getElementById('timeDisplay').innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+            // Playhead logic
+            if(vSource.duration) {
+                const ratio = vSource.currentTime / vSource.duration;
+                playhead.style.left = (ratio * 100) + '%';
+                document.getElementById('timeText').innerText = formatTime(vSource.currentTime) + " / " + formatTime(vSource.duration);
             }
-            requestAnimationFrame(draw);
+
+            requestAnimationFrame(renderLoop);
         }
 
-        function formatTime(s) {
-            const m = Math.floor(s/60).toString().padStart(2,'0');
-            const sec = Math.floor(s%60).toString().padStart(2,'0');
-            return `${m}:${sec}`;
+        // Timeline & Interaction
+        function renderTimeline() {
+            const container = document.getElementById('tlTracks');
+            // Clear but keep playhead
+            const existingClips = container.querySelectorAll('.clip');
+            existingClips.forEach(c => c.remove());
+
+            layers.forEach((l, i) => {
+                const clip = document.createElement('div');
+                clip.className = `clip ${i === activeIdx ? 'active' : ''}`;
+                clip.style.top = (i * 42) + 'px';
+                clip.style.left = '0%';
+                clip.style.width = '80%'; // Mock width
+                clip.onclick = (e) => { e.stopPropagation(); selectLayer(i); };
+                container.appendChild(clip);
+            });
         }
 
-        document.getElementById('layerName').oninput = (e) => { if(activeIndex !== -1) { layers[activeIndex].name = e.target.value; renderTimeline(); } };
-        document.getElementById('layerText').oninput = (e) => { if(activeIndex !== -1) layers[activeIndex].text = e.target.value; };
-        document.getElementById('layerFont').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].font = e.target.value; };
-        document.getElementById('textShadow').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].shadow = e.target.checked; };
-        document.getElementById('textOutline').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].outline = e.target.checked; };
-        document.getElementById('layerScale').oninput = (e) => {
-            if(activeIndex !== -1) {
-                layers[activeIndex].scale = parseFloat(e.target.value);
-                document.getElementById('scaleVal').innerText = Math.round(e.target.value * 100) + '%';
-            }
-        };
-        document.getElementById('layerColor').oninput = (e) => { if(activeIndex !== -1) layers[activeIndex].color = e.target.value; };
-        document.getElementById('waveStyle').onchange = (e) => { if(activeIndex !== -1) layers[activeIndex].waveStyle = e.target.value; };
-
-        canvas.onmousedown = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-            for(let i = layers.length-1; i >=0; i--) {
-                const l = layers[i];
-                if(mx > l.x - 100 && mx < l.x + 100 && my > l.y - 60 && my < l.y + 20) {
-                    selectLayer(i); isDragging = true;
-                    startX = mx - l.x; startY = my - l.y; return;
-                }
-            }
-            selectLayer(-1);
-        };
-        window.onmousemove = (e) => {
-            if(!isDragging || activeIndex === -1) return;
-            const rect = canvas.getBoundingClientRect();
-            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-            layers[activeIndex].x = mx - startX;
-            layers[activeIndex].y = my - startY;
-        };
-        window.onmouseup = () => isDragging = false;
-
+        // Handlers
+        vSource.onloadedmetadata = () => renderTimeline();
         document.getElementById('videoInput').onchange = (e) => {
             const file = e.target.files[0];
-            if(file) {
-                video.src = URL.createObjectURL(file);
-                video.load();
-                video.onloadedmetadata = () => { initAudio(); renderTimeline(); };
+            if(file) vSource.src = URL.createObjectURL(file);
+        };
+
+        playBtn.onclick = () => {
+            if(vSource.paused) {
+                vSource.play();
+                document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            } else {
+                vSource.pause();
+                document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
             }
         };
 
         async function initAudio() {
             if(!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioCtx.createMediaElementSource(video);
+                audioCtx = new AudioContext();
+                const src = audioCtx.createMediaElementSource(vSource);
                 analyzer = audioCtx.createAnalyser();
-                analyzer.fftSize = 256;
-                source.connect(analyzer);
+                src.connect(analyzer);
                 analyzer.connect(audioCtx.destination);
                 dataArray = new Uint8Array(analyzer.frequencyBinCount);
             }
         }
 
-        playBtn.onclick = async () => {
-            if(!video.src) return;
-            if(audioCtx?.state === 'suspended') await audioCtx.resume();
-            if(video.paused) {
-                video.play();
-                document.getElementById('playIcon').innerHTML = '<path d="M4 4h4v12H4V4zm8 0h4v12h-4V4z"/>';
-            } else {
-                video.pause();
-                document.getElementById('playIcon').innerHTML = '<path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.841z"/>';
-            }
-        };
+        function formatTime(s) {
+            const m = Math.floor(s/60);
+            const sec = Math.floor(s%60);
+            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+        }
 
-        window.exportVideoHD = () => {
-            if(!video.src) return;
-            const qualityScale = parseInt(document.getElementById('exportQuality').value);
+        // Inspector Binding
+        document.getElementById('lScale').oninput = e => layers[activeIdx].scale = e.target.value;
+        document.getElementById('lRotate').oninput = e => layers[activeIdx].rotate = e.target.value;
+        document.getElementById('lOpacity').oninput = e => layers[activeIdx].opacity = e.target.value;
+        document.getElementById('lText').oninput = e => layers[activeIdx].text = e.target.value;
+        document.getElementById('lColor').oninput = e => layers[activeIdx].color = e.target.value;
+        document.getElementById('lWaveStyle').onchange = e => layers[activeIdx].waveStyle = e.target.value;
+
+        // Drag Logic
+        canvas.onmousedown = (e) => {
+            const r = canvas.getBoundingClientRect();
+            const mx = (e.clientX - r.left) * (canvas.width/r.width);
+            const my = (e.clientY - r.top) * (canvas.height/r.height);
+            
+            for(let i=layers.length-1; i>=0; i--) {
+                const l = layers[i];
+                if(Math.abs(mx - l.x) < 50 && Math.abs(my - l.y) < 50) {
+                    selectLayer(i);
+                    isDragging = true;
+                    startX = mx - l.x; startY = my - l.y;
+                    return;
+                }
+            }
+            selectLayer(-1);
+        };
+        window.onmousemove = (e) => {
+            if(!isDragging || activeIdx === -1) return;
+            const r = canvas.getBoundingClientRect();
+            const mx = (e.clientX - r.left) * (canvas.width/r.width);
+            const my = (e.clientY - r.top) * (canvas.height/r.height);
+            // Phase 1: Boundary Protection
+            layers[activeIdx].x = Math.max(0, Math.min(canvas.width, mx - startX));
+            layers[activeIdx].y = Math.max(0, Math.min(canvas.height, my - startY));
+        };
+        window.onmouseup = () => isDragging = false;
+
+        window.exportVideo = () => {
+            const q = parseInt(document.getElementById('exportQuality').value);
+            // Real HD rendering logic using canvas capture
             const stream = canvas.captureStream(30);
-            const recorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: 10000000 * (qualityScale/2)
-            });
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm', videoBitsPerSecond: 8000000 * q });
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Wavevoice_Pro_${qualityScale === 4 ? '4K' : 'HD'}.webm`;
-                a.click();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'Wavevoice_Export.webm'; a.click();
             };
             recorder.start();
-            video.currentTime = 0; video.play();
-            setTimeout(() => recorder.stop(), (video.duration || 5) * 1000);
+            vSource.currentTime = 0; vSource.play();
+            setTimeout(() => recorder.stop(), vSource.duration * 1000);
         };
 
         init();
