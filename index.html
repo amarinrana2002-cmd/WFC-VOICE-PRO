@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Recorder Pro</title>
+    <title>Wavevoice - Voice Recorder Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -18,6 +18,12 @@
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .record-pulse {
@@ -41,75 +47,115 @@
             border-radius: 10px;
         }
 
-        select option {
-            background: #1e293b;
-            color: #f8fafc;
+        .star-rating {
+            direction: rtl;
+            display: inline-block;
+        }
+        .star-rating input { display: none; }
+        .star-rating label {
+            color: #475569;
+            font-size: 1.5rem;
+            padding: 0 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #fbbf24;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center">
 
-    <div class="w-full max-w-md glass rounded-3xl p-8 shadow-2xl">
-        <!-- Header -->
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                Wavevoice
-            </h1>
-            <p class="text-slate-400 text-sm mt-2">Fluid audio capture</p>
+    <nav class="w-full nav-glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-tr from-blue-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="text-xl font-bold tracking-tight">Wavevoice <span class="text-xs font-light text-slate-500 ml-1">v2.0</span></span>
         </div>
 
-        <!-- Mic Selector -->
-        <div class="mb-6">
-            <label for="micSelect" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Select Microphone</label>
-            <div class="relative">
-                <select id="micSelect" class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer">
-                    <option value="">Requesting access...</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex items-center gap-2 mr-4 text-xs text-slate-400">
+                <span>Rate our tool:</span>
+                <div class="star-rating">
+                    <input type="radio" id="5-stars" name="rating" value="5" /><label for="5-stars">★</label>
+                    <input type="radio" id="4-stars" name="rating" value="4" /><label for="4-stars">★</label>
+                    <input type="radio" id="3-stars" name="rating" value="3" /><label for="3-stars">★</label>
+                    <input type="radio" id="2-stars" name="rating" value="2" /><label for="2-stars">★</label>
+                    <input type="radio" id="1-star" name="rating" value="1" /><label for="1-star">★</label>
+                </div>
+            </div>
+            <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Sign In</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex items-center justify-center w-full p-4">
+        <div class="w-full max-w-md glass rounded-3xl p-8 shadow-2xl">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Audio Dashboard</h1>
+                    <p id="dateDisplay" class="text-slate-400 text-xs mt-1 uppercase tracking-widest font-semibold"></p>
+                </div>
+                <div class="text-right">
+                    <div id="storageInfo" class="text-[10px] text-slate-500 mb-1">SESSION STAGE</div>
+                    <div id="sessionCount" class="text-emerald-400 font-mono text-sm">0.0 MB</div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="micSelect" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Input Source</label>
+                <div class="relative">
+                    <select id="micSelect" class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer">
+                        <option value="">Requesting access...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative h-40 w-full bg-slate-900/50 rounded-2xl mb-8 overflow-hidden border border-slate-700/50">
+                <canvas id="visualizer" class="w-full h-full"></canvas>
+                <div id="timer" class="absolute top-2 right-4 font-mono text-xl text-emerald-400 hidden">00:00</div>
+                <div id="recordingIndicator" class="absolute top-3 left-4 flex items-center gap-2 hidden">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span class="text-[10px] text-red-500 font-bold uppercase tracking-tighter">Live</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-6">
+                <div class="relative">
+                    <button id="recordBtn" class="w-20 h-20 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg shadow-red-500/20 active:scale-95">
+                        <svg id="recordIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <svg id="stopIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="6" width="12" height="12" rx="2" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <p id="statusText" class="text-slate-400 font-medium">Ready to capture</p>
+            </div>
+
+            <div class="mt-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-slate-200">Library</h2>
+                    <span id="recordingCount" class="text-xs bg-slate-700 px-2 py-1 rounded-full text-slate-300">0 Items</span>
+                </div>
+                
+                <div id="recordingsList" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                    <div id="emptyState" class="text-center py-8 text-slate-500 italic text-sm border-2 border-dashed border-slate-800 rounded-2xl">
+                        No audio files found.
+                    </div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- Visualizer -->
-        <div class="relative h-40 w-full bg-slate-900/50 rounded-2xl mb-8 overflow-hidden border border-slate-700/50">
-            <canvas id="visualizer" class="w-full h-full"></canvas>
-            <div id="timer" class="absolute top-2 right-4 font-mono text-xl text-emerald-400 hidden">00:00</div>
-        </div>
-
-        <!-- Main Controls -->
-        <div class="flex flex-col items-center gap-6">
-            <div class="relative">
-                <button id="recordBtn" class="w-20 h-20 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg shadow-red-500/20 active:scale-95">
-                    <svg id="recordIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                    <svg id="stopIcon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
-                        <rect x="6" y="6" width="12" height="12" rx="2" />
-                    </svg>
-                </button>
-            </div>
-            
-            <p id="statusText" class="text-slate-400 font-medium">Tap to start recording</p>
-        </div>
-
-        <!-- Recordings List -->
-        <div class="mt-10">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-slate-200">Recent Recordings</h2>
-                <span id="recordingCount" class="text-xs bg-slate-700 px-2 py-1 rounded-full text-slate-300">0</span>
-            </div>
-            
-            <div id="recordingsList" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
-                <div id="emptyState" class="text-center py-8 text-slate-500 italic text-sm">
-                    No recordings yet.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alert Component -->
-    <div id="customAlert" class="fixed top-4 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl border-red-500/50 text-red-400 hidden transition-all duration-300 z-50">
+    <div id="customAlert" class="fixed top-20 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl border-emerald-500/50 text-emerald-400 hidden transition-all duration-300 z-50">
         <span id="alertMsg"></span>
     </div>
 
@@ -124,6 +170,7 @@
         let timerInterval;
         let stream;
         let phase = 0;
+        let totalSize = 0;
 
         const recordBtn = document.getElementById('recordBtn');
         const recordIcon = document.getElementById('recordIcon');
@@ -136,6 +183,11 @@
         const micSelect = document.getElementById('micSelect');
         const canvas = document.getElementById('visualizer');
         const canvasCtx = canvas.getContext('2d');
+        const sessionCount = document.getElementById('sessionCount');
+        const recIndicator = document.getElementById('recordingIndicator');
+
+        // Set Date
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
         async function initDevices() {
             try {
@@ -165,9 +217,11 @@
         resizeCanvas();
         initDevices();
 
-        function showAlert(msg) {
+        function showAlert(msg, colorClass = 'text-emerald-400') {
             const alert = document.getElementById('customAlert');
-            document.getElementById('alertMsg').innerText = msg;
+            const alertMsg = document.getElementById('alertMsg');
+            alertMsg.innerText = msg;
+            alert.className = `fixed top-20 left-1/2 -translate-x-1/2 glass px-6 py-3 rounded-xl border-emerald-500/50 ${colorClass} transition-all duration-300 z-50`;
             alert.classList.remove('hidden');
             setTimeout(() => alert.classList.add('hidden'), 3000);
         }
@@ -175,51 +229,43 @@
         async function startRecording() {
             try {
                 const deviceId = micSelect.value;
-                const constraints = {
-                    audio: deviceId ? { deviceId: { exact: deviceId } } : true
-                };
+                const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
-                
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaStreamSource(stream);
                 analyzer = audioContext.createAnalyser();
                 analyzer.fftSize = 256;
                 source.connect(analyzer);
                 
-                const bufferLength = analyzer.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-
+                dataArray = new Uint8Array(analyzer.frequencyBinCount);
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
 
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    totalSize += (audioBlob.size / 1024 / 1024);
+                    sessionCount.innerText = `${totalSize.toFixed(1)} MB`;
                     addRecordingToList(audioBlob);
-                    stream.getTracks().forEach(track => track.stop());
+                    stream.getTracks().forEach(t => t.stop());
                     if (audioContext) audioContext.close();
                 };
 
                 mediaRecorder.start();
-                
                 recordBtn.classList.add('record-pulse');
                 recordIcon.classList.add('hidden');
                 stopIcon.classList.remove('hidden');
-                statusText.innerText = 'Recording...';
+                statusText.innerText = 'Capturing Audio...';
                 statusText.classList.add('text-red-400');
                 timerDisplay.classList.remove('hidden');
+                recIndicator.classList.remove('hidden');
                 micSelect.disabled = true;
                 
                 startTimer();
                 drawWave();
-
             } catch (err) {
-                showAlert('Could not access selected microphone.');
-                console.error(err);
+                showAlert('Access Denied!', 'text-red-400');
             }
         }
 
@@ -228,15 +274,14 @@
                 mediaRecorder.stop();
                 cancelAnimationFrame(animationId);
                 clearInterval(timerInterval);
-                
                 recordBtn.classList.remove('record-pulse');
                 recordIcon.classList.remove('hidden');
                 stopIcon.classList.add('hidden');
-                statusText.innerText = 'Tap to start recording';
+                statusText.innerText = 'Ready to capture';
                 statusText.classList.remove('text-red-400');
                 timerDisplay.classList.add('hidden');
+                recIndicator.classList.add('hidden');
                 micSelect.disabled = false;
-                
                 canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }
@@ -245,55 +290,35 @@
             startTime = Date.now();
             timerInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                const seconds = Math.floor((elapsed / 1000) % 60);
-                const minutes = Math.floor((elapsed / 1000 / 60) % 60);
-                timerDisplay.innerText = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                const sec = Math.floor((elapsed / 1000) % 60).toString().padStart(2, '0');
+                const min = Math.floor((elapsed / 1000 / 60) % 60).toString().padStart(2, '0');
+                timerDisplay.innerText = `${min}:${sec}`;
             }, 100);
         }
 
-        // The "Wavevoice" Visualizer Logic
         function drawWave() {
             animationId = requestAnimationFrame(drawWave);
             analyzer.getByteFrequencyData(dataArray);
-
-            // Calculate average frequency volume
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-                sum += dataArray[i];
-            }
-            const average = sum / dataArray.length;
-            const normalizedVol = average / 128; // scale volume for wave height
-
+            let sum = dataArray.reduce((a, b) => a + b, 0);
+            const normalizedVol = sum / dataArray.length / 128;
             canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw background waves for depth
-            drawSingleWave(normalizedVol, 0.5, '#3b82f6', 0.5, phase);
-            drawSingleWave(normalizedVol, 0.3, '#10b981', 0.8, phase * 1.5);
-            drawSingleWave(normalizedVol, 1.0, '#60a5fa', 1, phase * 0.8);
-
-            phase += 0.05 + (normalizedVol * 0.1); // Speed up with volume
+            drawSingleWave(normalizedVol, 0.4, '#3b82f6', 0.5, phase);
+            drawSingleWave(normalizedVol, 0.2, '#10b981', 0.8, phase * 1.5);
+            drawSingleWave(normalizedVol, 0.8, '#60a5fa', 1, phase * 0.8);
+            phase += 0.05 + (normalizedVol * 0.1);
         }
 
-        function drawSingleWave(volume, opacity, color, frequencyMult, phaseOffset) {
+        function drawSingleWave(volume, opacity, color, freq, pOff) {
             canvasCtx.beginPath();
             canvasCtx.strokeStyle = color;
             canvasCtx.lineWidth = 2;
             canvasCtx.globalAlpha = opacity;
-
             const midY = canvas.height / 2;
-            const amplitude = 5 + (volume * 50); // Base height + reactive height
-
+            const amp = 5 + (volume * 60);
             for (let x = 0; x <= canvas.width; x += 2) {
-                // Sine wave formula: y = amplitude * sin(frequency * x + phase)
-                const y = midY + Math.sin(x * 0.02 * frequencyMult + phaseOffset) * amplitude;
-                if (x === 0) {
-                    canvasCtx.moveTo(x, y);
-                } else {
-                    canvasCtx.lineTo(x, y);
-                }
+                const y = midY + Math.sin(x * 0.02 * freq + pOff) * amp;
+                x === 0 ? canvasCtx.moveTo(x, y) : canvasCtx.lineTo(x, y);
             }
-
             canvasCtx.stroke();
             canvasCtx.globalAlpha = 1.0;
         }
@@ -301,55 +326,59 @@
         function addRecordingToList(blob) {
             emptyState.classList.add('hidden');
             const url = URL.createObjectURL(blob);
-            const id = Date.now();
-            const dateStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const sizeStr = (blob.size / 1024).toFixed(1) + ' KB';
 
-            const recordingItem = document.createElement('div');
-            recordingItem.className = 'bg-slate-800/50 p-3 rounded-xl border border-slate-700 flex flex-col gap-3 transition-all hover:border-slate-500';
-            recordingItem.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <span class="text-sm font-medium text-slate-300">Recording ${dateStr}</span>
-                    <div class="flex gap-2">
-                        <button onclick="downloadRecording('${url}', '${id}')" class="text-slate-400 hover:text-blue-400 p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
+            const item = document.createElement('div');
+            item.className = 'bg-slate-800/40 p-3 rounded-2xl border border-slate-700/50 flex flex-col gap-2 hover:bg-slate-800/60 transition-all';
+            item.innerHTML = `
+                <div class="flex justify-between items-center px-1">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-200">VOICE_${Date.now().toString().slice(-4)}</span>
+                        <span class="text-[10px] text-slate-500 uppercase">${timeStr} • ${sizeStr}</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="downloadRecording('${url}')" class="p-2 hover:bg-blue-500/20 rounded-lg text-blue-400 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-width="2"/></svg>
                         </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove(); updateCount();" class="text-slate-400 hover:text-red-400 p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove(); updateCount();" class="p-2 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg>
                         </button>
                     </div>
                 </div>
-                <audio controls src="${url}" class="w-full h-8 opacity-80"></audio>
+                <audio controls src="${url}" class="w-full h-8 brightness-90 contrast-125"></audio>
             `;
-            recordingsList.prepend(recordingItem);
+            recordingsList.prepend(item);
             updateCount();
+            showAlert('Recording saved to library');
         }
 
-        window.downloadRecording = (url, id) => {
+        window.downloadRecording = (url) => {
             const a = document.createElement('a');
-            a.style.display = 'none';
             a.href = url;
-            a.download = `voice-recording-${id}.wav`;
-            document.body.appendChild(a);
+            a.download = `Wavevoice_${Date.now()}.wav`;
             a.click();
-            document.body.removeChild(a);
         };
 
         function updateCount() {
-            const items = recordingsList.querySelectorAll('.bg-slate-800\\/50').length;
-            recordingCount.innerText = items;
-            if (items === 0) emptyState.classList.remove('hidden');
+            const count = recordingsList.querySelectorAll('.bg-slate-800\\/40').length;
+            recordingCount.innerText = `${count} Items`;
+            if (count === 0) {
+                emptyState.classList.remove('hidden');
+                totalSize = 0;
+                sessionCount.innerText = '0.0 MB';
+            }
         }
 
         recordBtn.addEventListener('click', () => {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                stopRecording();
-            } else {
-                startRecording();
-            }
+            (mediaRecorder && mediaRecorder.state === 'recording') ? stopRecording() : startRecording();
+        });
+
+        // Rating Alert
+        document.querySelectorAll('.star-rating input').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                showAlert(`Thanks for rating us ${e.target.value} stars!`);
+            });
         });
 
         navigator.mediaDevices.ondevicechange = initDevices;
